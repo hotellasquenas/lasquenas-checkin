@@ -188,8 +188,8 @@ function generarLink() {
   const codigo = document.getElementById("inp-codigo").value;
   telCompleto = codigo + tel.replace(/\D/g, "");
 
-  // Construir URL del pre check-in (relativa al mismo directorio)
-  const base = window.location.href.replace("5_invitacion_whatsapp.html", "");
+  // URL base en internet (GitHub Pages)
+  const base = "https://hotellasquenas.github.io/lasquenas-checkin/";
   const params = new URLSearchParams({
     r: codigoReserva,
     n: nombre,
