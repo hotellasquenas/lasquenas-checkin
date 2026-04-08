@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Panel Admin — Hotel Las Quenas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary:#755b00; --primary-c:#c9a227; --surface:#fff8f5;
+    --on-surface:#2f1500; --secondary:#865225; --container:#ffeadc;
+    --container-low:#fff1e9; --outline:#d1c5af; --error:#ba1a1a;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Work Sans',sans-serif; background:#f5f0eb; color:var(--on-surface); min-height:100vh; }
+  .font-serif { font-family:'Noto Serif',serif; }
+  .ms { font-family:'Material Symbols Outlined'; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display:inline-block; line-height:1; }
+
+  /* Sidebar */
+  .sidebar {
+    width:240px; background:var(--on-surface); color:white;
+    position:fixed; left:0; top:0; bottom:0; z-index:100;
+    display:flex; flex-direction:column; padding:24px 0;
+    transition:transform .3s;
+  }
+  @media(max-width:900px) { .sidebar { transform:translateX(-100%); } .sidebar.open { transform:none; } }
+  .sidebar-logo { padding:0 24px 24px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:16px; }
+  .sidebar-logo .hotel-name { font-family:'Noto Serif',serif; font-size:16px; font-weight:700; color:var(--primary-c); letter-spacing:.08em; }
+  .sidebar-logo .admin-label { font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:rgba(255,255,255,.4); margin-top:4px; }
+  .nav-link {
+    display:flex; align-items:center; gap:12px; padding:12px 24px;
+    color:rgba(255,255,255,.7); text-decoration:none; font-size:14px; font-weight:500;
+    transition:all .2s; border-left:3px solid transparent; cursor:pointer;
+  }
+  .nav-link:hover { color:white; background:rgba(255,255,255,.05); }
+  .nav-link.active { color:var(--primary-c); border-left-color:var(--primary-c); background:rgba(201,162,39,.1); }
+
+  /* Main */
+  .main { margin-left:240px; padding:32px; min-height:100vh; }
+  @media(max-width:900px) { .main { margin-left:0; padding:16px; } }
+
+  /* Stats cards */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+  @media(max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:600px) { .stats-grid { grid-template-columns:1fr 1fr; } }
+
+  .stat-card {
+    background:white; border-radius:14px; padding:20px;
+    border-bottom:3px solid var(--outline);
+  }
+  .stat-card.primary { border-bottom-color:var(--primary); }
+  .stat-card.amber { border-bottom-color:#f59e0b; }
+  .stat-card.green { border-bottom-color:#16a34a; }
+  .stat-card.red { border-bottom-color:var(--error); }
+  .stat-number { font-family:'Noto Serif',serif; font-size:36px; font-weight:700; line-height:1; margin-bottom:6px; }
+  .stat-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#7f7663; }
+
+  /* Tabla */
+  .tabla-container { background:white; border-radius:16px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .tabla-header { padding:20px 24px; border-bottom:1px solid var(--outline); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:var(--container-low); padding:12px 16px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#4d4635; font-weight:700; }
+  td { padding:14px 16px; border-bottom:1px solid var(--container-low); font-size:14px; vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#fffbf7; }
+
+  .badge {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:4px 10px; border-radius:100px; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.06em;
+  }
+  .badge.registrado { background:#fff3cd; color:#92400e; }
+  .badge.confirmado { background:#d1fae5; color:#065f46; }
+  .badge.pendiente { background:#fef3c7; color:#b45309; }
+  .badge.cancelado { background:#fee2e2; color:#991b1b; }
+
+  .btn-detalle {
+    background:var(--container); border:none; border-radius:8px;
+    padding:6px 12px; cursor:pointer; color:var(--primary);
+    font-size:12px; font-weight:600; text-decoration:none;
+    display:inline-flex; align-items:center; gap:4px;
+    transition:background .2s;
+  }
+  .btn-detalle:hover { background:var(--container); opacity:.8; }
+
+  /* Búsqueda y filtros */
+  .search-input {
+    padding:10px 16px; border:1.5px solid var(--outline); border-radius:10px;
+    font-family:'Work Sans',sans-serif; font-size:14px; outline:none;
+    transition:border-color .2s; background:white;
+  }
+  .search-input:focus { border-color:var(--primary); }
+
+  .filter-btn {
+    padding:8px 16px; border:1.5px solid var(--outline); border-radius:8px;
+    background:white; cursor:pointer; font-family:'Work Sans',sans-serif;
+    font-size:13px; font-weight:500; color:var(--on-surface); transition:all .2s;
+  }
+  .filter-btn.active { background:var(--primary); color:white; border-color:var(--primary); }
+
+  /* Drive info */
+  .drive-info { background:white; border-radius:14px; padding:20px; margin-bottom:32px; }
+  .drive-bar { height:8px; background:var(--outline); border-radius:4px; overflow:hidden; margin:8px 0; }
+  .drive-fill { height:100%; background:linear-gradient(90deg,var(--primary),var(--primary-c)); border-radius:4px; transition:width 1s ease; }
+
+  .spinner-full { display:flex; align-items:center; justify-content:center; padding:60px; gap:12px; color:#7f7663; }
+
+  /* Mobile toggle */
+  .menu-toggle { display:none; background:none; border:none; cursor:pointer; }
+  @media(max-width:900px) { .menu-toggle { display:flex; } }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="hotel-name">Hotel Las Quenas</div>
+    <div class="admin-label">Panel Administrativo</div>
+  </div>
+
+  <nav style="flex:1;">
+    <div class="nav-link active" onclick="mostrarSeccion('huespedes')">
+      <span class="ms">people</span> Huéspedes
+    </div>
+    <div class="nav-link" onclick="mostrarSeccion('estadisticas')">
+      <span class="ms">bar_chart</span> Estadísticas
+    </div>
+    <div class="nav-link" onclick="window.open('5_invitacion_whatsapp.html','_blank')">
+      <span class="ms">send</span> Enviar Invitación
+    </div>
+    <div class="nav-link" onclick="cargarDatos()">
+      <span class="ms">refresh</span> Actualizar datos
+    </div>
+  </nav>
+
+  <div style="padding:16px 24px; border-top:1px solid rgba(255,255,255,.1); font-size:12px; color:rgba(255,255,255,.4);">
+    <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="117d70626064747f7062787f7f51767c70787d3f727e7c">[email&#160;protected]</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Top bar mobile -->
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
+    <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">
+      <span class="ms" style="font-size:24px; color:var(--on-surface);">menu</span>
+    </button>
+    <h1 class="font-serif" style="font-size:24px; flex:1;" id="titulo-seccion">Huéspedes Registrados</h1>
+    <div style="font-size:12px; color:#7f7663;" id="ultima-actualizacion">—</div>
+  </div>
+
+  <!-- Drive info -->
+  <div class="drive-info" style="margin-bottom:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="ms" style="color:var(--primary); font-size:20px;">cloud</span>
+        <span style="font-size:13px; font-weight:600;">Google Drive — <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="365a57454743535857455f585876515b575f5a1855595b">[email&#160;protected]</a></span>
+      </div>
+      <span style="font-size:12px; color:#7f7663;" id="drive-percent">Calculando...</span>
+    </div>
+    <div class="drive-bar">
+      <div class="drive-fill" id="drive-fill" style="width:0%"></div>
+    </div>
+    <div style="font-size:11px; color:#7f7663;" id="drive-texto">Cargando información...</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-number" id="stat-total">—</div>
+      <div class="stat-label">Total registrados</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-number" id="stat-hoy">—</div>
+      <div class="stat-label">Llegan hoy</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-number" id="stat-confirmados">—</div>
+      <div class="stat-label">Confirmados</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-number" id="stat-pendientes">—</div>
+      <div class="stat-label">Pendientes</div>
+    </div>
+  </div>
+
+  <!-- Sección Huéspedes -->
+  <div id="seccion-huespedes">
+    <div class="tabla-container">
+      <div class="tabla-header">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <input class="search-input" type="text" placeholder="🔍 Buscar huésped..." id="buscador" oninput="filtrarTabla()" style="width:220px;"/>
+          <button class="filter-btn active" onclick="setFiltro('todos',this)">Todos</button>
+          <button class="filter-btn" onclick="setFiltro('hoy',this)">Hoy</button>
+          <button class="filter-btn" onclick="setFiltro('pendiente',this)">Pendientes</button>
+        </div>
+        <button onclick="cargarDatos()" style="display:flex;align-items:center;gap:6px;background:var(--container);border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:'Work Sans',sans-serif;font-size:13px;color:var(--primary);font-weight:600;">
+          <span class="ms" id="refresh-icon">refresh</span> Actualizar
+        </button>
+      </div>
+
+      <div id="tabla-body">
+        <div class="spinner-full">
+          <span class="ms" style="animation:spin 1s linear infinite;">refresh</span>
+          Cargando huéspedes...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección estadísticas (placeholder) -->
+  <div id="seccion-estadisticas" style="display:none;">
+    <div style="background:white;border-radius:16px;padding:40px;text-align:center;color:#7f7663;">
+      <span class="ms" style="font-size:48px;color:var(--outline);">bar_chart</span>
+      <p style="margin-top:16px;font-size:16px;">Las estadísticas se habilitarán cuando haya datos registrados.</p>
+    </div>
+  </div>
+
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── CONFIGURACIÓN ──────────────────────────────────────────
+// Cambia esta URL por la de tu Apps Script
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhVLLI4M87HdWaivMdt-pSWN5_SekVdJ_3X47Z1zO5fgg5AL8xTCQao7O6cYLO2uu2BA/exec";
+
+let reservasGlobal = [];
+let filtroActual = "todos";
+
+// ── Cargar datos ───────────────────────────────────────────
+async function cargarDatos() {
+  const icon = document.getElementById("refresh-icon");
+  icon.style.animation = "spin 1s linear infinite";
+
+  const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
+
+  try {
+    let reservas = [];
+
+    if (modoDemo) {
+      // Datos de demo para mostrar cómo funciona
+      const hoy = new Date().toISOString().split("T")[0];
+      reservas = [
+        { id_reserva:"QNS-2025-1234", nombre_titular:"Carlos Mendoza", email:"carlos@email.com", telefono:"51987654321", contacto:"WhatsApp", estado:"Confirmado", fecha_llegada:hoy, aerolinea:"LATAM", nro_vuelo:"LA2010", hora_estimada:"14:30", tours:"Machu Picchu, Valle Sagrado", foto_url:"", acompanantes:[], fecha_registro:new Date().toLocaleString("es-PE") },
+        { id_reserva:"QNS-2025-2567", nombre_titular:"María González", email:"maria@email.com", telefono:"54911234567", contacto:"WhatsApp", estado:"Registrado", fecha_llegada:hoy, aerolinea:"Avianca", nro_vuelo:"AV842", hora_estimada:"18:45", tours:"Vinicunca", foto_url:"", acompanantes:[{nombre:"Luis González", tipo:"adulto"}], fecha_registro:new Date().toLocaleString("es-PE") },
+        { id_reserva:"QNS-2025-3891", nombre_titular:"James Smith", email:"james@email.com", telefono:"14155552671", contacto:"WhatsApp", estado:"Pendiente", fecha_llegada:"2025-03-20", aerolinea:"American", nro_vuelo:"AA901", hora_estimada:"11:00", tours:"Machu Picchu, Saqsaywaman", foto_url:"", acompanantes:[], fecha_registro:"15/03/2025 09:12" }
+      ];
+    } else {
+      const resp = await fetch(SCRIPT_URL + "?action=obtener_reservas");
+      const data = await resp.json();
+      if (data.ok) reservas = data.reservas;
+    }
+
+    reservasGlobal = reservas;
+    actualizarEstadisticas(reservas);
+    renderTabla(reservas);
+
+    document.getElementById("ultima-actualizacion").textContent =
+      "Actualizado: " + new Date().toLocaleTimeString("es-PE");
+
+    // Simular info de Drive
+    const totalFotos = reservas.length * 1.2;
+    const gb = Math.min(totalFotos * 0.15 / 1000, 15);
+    const pct = Math.round(gb / 15 * 100 * 10) / 10;
+    document.getElementById("drive-fill").style.width = pct + "%";
+    document.getElementById("drive-percent").textContent = pct + "% usado";
+    document.getElementById("drive-texto").textContent =
+      `${(gb).toFixed(2)} GB de 15 GB · ${reservas.length * Math.round(1 + (reservas.reduce((a,r)=>a+(r.acompanantes||[]).length,0)/reservas.length||0))} fotos AVIF guardadas`;
+
+  } catch (err) {
+    document.getElementById("tabla-body").innerHTML = `
+      <div class="spinner-full" style="flex-direction:column;gap:8px;">
+        <span class="ms" style="font-size:32px;color:var(--error);">error</span>
+        <p>No se pudo conectar al servidor.</p>
+        <p style="font-size:12px;">Verifica la URL del Apps Script en admin_panel.html</p>
+      </div>`;
+  }
+
+  icon.style.animation = "none";
+}
+
+function actualizarEstadisticas(reservas) {
+  const hoy = new Date().toISOString().split("T")[0];
+  document.getElementById("stat-total").textContent = reservas.length;
+  document.getElementById("stat-hoy").textContent = reservas.filter(r => r.fecha_llegada === hoy).length;
+  document.getElementById("stat-confirmados").textContent = reservas.filter(r => r.estado === "Confirmado").length;
+  document.getElementById("stat-pendientes").textContent = reservas.filter(r => r.estado !== "Confirmado").length;
+}
+
+function renderTabla(reservas) {
+  if (reservas.length === 0) {
+    document.getElementById("tabla-body").innerHTML = `
+      <div class="spinner-full" style="flex-direction:column;">
+        <span class="ms" style="font-size:40px;color:var(--outline);">inbox</span>
+        <p style="margin-top:12px;color:#7f7663;">Aún no hay huéspedes registrados.<br/>Envía invitaciones desde el menú lateral.</p>
+      </div>`;
+    return;
+  }
+
+  const hoy = new Date().toISOString().split("T")[0];
+
+  const filas = reservas.map(r => {
+    const llegaHoy = r.fecha_llegada === hoy;
+    const iniciales = (r.nombre_titular || "??").split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase();
+    const estadoClass = { "Confirmado":"confirmado", "Registrado":"registrado", "Pendiente":"pendiente", "Cancelado":"cancelado" }[r.estado] || "pendiente";
+
+    const acompN = (r.acompanantes || []).length;
+
+    return `
+      <tr style="${llegaHoy ? 'background:#fffbf0;' : ''}">
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--container);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--primary);flex-shrink:0;">${iniciales}</div>
+            <div>
+              <div style="font-weight:600;">${r.nombre_titular || "—"}</div>
+              <div style="font-size:12px;color:#7f7663;">${r.email || ""}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div style="font-size:13px;font-family:monospace;color:var(--primary);font-weight:600;">${r.id_reserva}</div>
+          <div style="font-size:11px;color:#7f7663;">${r.fecha_registro || ""}</div>
+        </td>
+        <td>
+          ${r.fecha_llegada ? `<div style="font-weight:600;${llegaHoy?'color:#b45309;':''}">${formatFecha(r.fecha_llegada)}${llegaHoy?' 🔔':''}</div>` : '—'}
+          <div style="font-size:12px;color:#7f7663;">${r.aerolinea || ""} ${r.nro_vuelo || ""} ${r.hora_estimada ? '· '+r.hora_estimada : ''}</div>
+        </td>
+        <td>
+          <span class="badge ${estadoClass}">${r.estado || "Pendiente"}</span>
+        </td>
+        <td>
+          <div style="font-size:13px;">${acompN > 0 ? acompN + ' acomp.' : 'Solo'}</div>
+          ${r.foto_url ? '<div style="font-size:11px;color:var(--primary);">📎 Con foto</div>' : '<div style="font-size:11px;color:#7f7663;">Sin foto aún</div>'}
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <a class="btn-detalle" href="admin_detalle.html?r=${r.id_reserva}" target="_blank">
+              <span class="ms" style="font-size:14px;">visibility</span> Ver
+            </a>
+            ${r.telefono ? `
+            <a class="btn-detalle" href="https://wa.me/${r.telefono}" target="_blank" style="background:#d1fae5;color:#065f46;">
+              <span class="ms" style="font-size:14px;">chat</span>
+            </a>` : ''}
+            <select onchange="cambiarEstado('${r.id_reserva}',this.value)" style="font-size:12px;border:1px solid var(--outline);border-radius:6px;padding:4px;cursor:pointer;font-family:'Work Sans',sans-serif;">
+              <option value="">Estado...</option>
+              <option value="Registrado">Registrado</option>
+              <option value="Confirmado">Confirmado</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  document.getElementById("tabla-body").innerHTML = `
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Huésped</th>
+            <th>Reserva</th>
+            <th>Llegada</th>
+            <th>Estado</th>
+            <th>Grupo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>${filas}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function formatFecha(str) {
+  if (!str) return "—";
+  const d = new Date(str + "T12:00:00");
+  return d.toLocaleDateString("es-PE", { day:"numeric", month:"short", year:"numeric" });
+}
+
+// ── Filtros ────────────────────────────────────────────────
+function setFiltro(f, btn) {
+  filtroActual = f;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  filtrarTabla();
+}
+
+function filtrarTabla() {
+  const q = document.getElementById("buscador").value.toLowerCase();
+  const hoy = new Date().toISOString().split("T")[0];
+
+  let filtradas = reservasGlobal.filter(r => {
+    const matchQ = !q ||
+      (r.nombre_titular || "").toLowerCase().includes(q) ||
+      (r.id_reserva || "").toLowerCase().includes(q) ||
+      (r.email || "").toLowerCase().includes(q);
+
+    const matchF = filtroActual === "todos" ||
+      (filtroActual === "hoy" && r.fecha_llegada === hoy) ||
+      (filtroActual === "pendiente" && r.estado !== "Confirmado");
+
+    return matchQ && matchF;
+  });
+
+  renderTabla(filtradas);
+}
+
+// ── Cambiar estado ─────────────────────────────────────────
+async function cambiarEstado(idReserva, estado) {
+  if (!estado) return;
+  const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
+
+  if (!modoDemo) {
+    await fetch(SCRIPT_URL, {
+      method:"POST",
+      body:JSON.stringify({ action:"actualizar_estado", id_reserva:idReserva, estado }),
+      headers:{"Content-Type":"text/plain"}
+    });
+  }
+
+  // Actualizar localmente
+  const r = reservasGlobal.find(r => r.id_reserva === idReserva);
+  if (r) r.estado = estado;
+  filtrarTabla();
+  mostrarToast("Estado actualizado: " + estado);
+}
+
+// ── Secciones ──────────────────────────────────────────────
+function mostrarSeccion(s) {
+  document.getElementById("seccion-huespedes").style.display = s === "huespedes" ? "block" : "none";
+  document.getElementById("seccion-estadisticas").style.display = s === "estadisticas" ? "block" : "none";
+  document.querySelectorAll(".nav-link").forEach((el,i) => el.classList.toggle("active", i === (s==="huespedes"?0:1)));
+  document.getElementById("titulo-seccion").textContent = s === "huespedes" ? "Huéspedes Registrados" : "Estadísticas";
+}
+
+function mostrarToast(msg) {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  t.style.cssText = "position:fixed;bottom:24px;right:24px;background:#755b00;color:wh

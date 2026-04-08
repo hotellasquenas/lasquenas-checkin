@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Detalle Huésped — Hotel Las Quenas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary:#755b00; --primary-c:#c9a227; --surface:#fff8f5;
+    --on-surface:#2f1500; --secondary:#865225; --container:#ffeadc;
+    --container-low:#fff1e9; --outline:#d1c5af; --error:#ba1a1a;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Work Sans',sans-serif; background:#f5f0eb; color:var(--on-surface); min-height:100vh; }
+  .font-serif { font-family:'Noto Serif',serif; }
+  .ms { font-family:'Material Symbols Outlined'; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display:inline-block; line-height:1; }
+
+  .card { background:white; border-radius:16px; padding:24px; margin-bottom:16px; }
+  .section-title { font-family:'Noto Serif',serif; font-size:16px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .data-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--container-low); font-size:14px; }
+  .data-row:last-child { border-bottom:none; padding-bottom:0; }
+  .data-label { color:#7f7663; font-size:12px; text-transform:uppercase; letter-spacing:.06em; align-self:center; }
+  .data-value { font-weight:600; text-align:right; max-width:65%; word-break:break-word; }
+
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:10px; border:none; cursor:pointer; font-family:'Work Sans',sans-serif; font-size:13px; font-weight:600; text-decoration:none; transition:opacity .2s; }
+  .btn:hover { opacity:.85; }
+  .btn-primary { background:linear-gradient(135deg,var(--primary),var(--primary-c)); color:white; }
+  .btn-wa { background:#25D366; color:white; }
+  .btn-ghost { background:var(--container-low); color:var(--secondary); }
+
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:4px 12px; border-radius:100px; font-size:12px; font-weight:700; text-transform:uppercase; }
+  .badge.registrado { background:#fff3cd; color:#92400e; }
+  .badge.confirmado { background:#d1fae5; color:#065f46; }
+  .badge.pendiente { background:#fef3c7; color:#b45309; }
+
+  .tour-chip { display:inline-flex; align-items:center; gap:4px; padding:6px 12px; background:var(--container-low); border-radius:100px; font-size:13px; color:var(--secondary); margin:4px; }
+
+  .foto-container { border:2px solid var(--outline); border-radius:10px; overflow:hidden; text-align:center; }
+  .foto-container img { width:100%; max-height:220px; object-fit:cover; }
+  .foto-placeholder { padding:32px; color:#7f7663; }
+
+  .acomp-card { background:var(--container-low); border-radius:10px; padding:16px; margin-bottom:8px; }
+
+  .estado-select { padding:8px 14px; border:1.5px solid var(--outline); border-radius:8px; font-family:'Work Sans',sans-serif; font-size:14px; outline:none; cursor:pointer; }
+  .estado-select:focus { border-color:var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div style="background:var(--on-surface);padding:16px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;">
+  <a href="admin_panel.html" style="color:rgba(255,255,255,.7);display:flex;align-items:center;text-decoration:none;gap:4px;font-size:14px;">
+    <span class="ms">arrow_back</span> Panel
+  </a>
+  <div style="flex:1;text-align:center;font-family:'Noto Serif',serif;font-size:16px;color:#c9a227;font-weight:700;">Las Quenas · Admin</div>
+  <div style="width:60px;"></div>
+</div>
+
+<main style="max-width:800px;margin:0 auto;padding:24px 20px 48px;" id="main-content">
+  <div style="color:#7f7663;text-align:center;padding:60px;">Cargando información del huésped...</div>
+</main>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhVLLI4M87HdWaivMdt-pSWN5_SekVdJ_3X47Z1zO5fgg5AL8xTCQao7O6cYLO2uu2BA/exec";
+
+function getParam(k) { return new URLSearchParams(window.location.search).get(k); }
+const idReserva = getParam("r");
+
+const TOURS_MAP = {
+  machu_picchu:"Machu Picchu", valle_sagrado:"Valle Sagrado", vinicunca:"Montaña Vinicunca",
+  saqsaywaman:"Saqsaywaman", humantay:"Laguna Humantay", city_tour:"City Tour Cusco"
+};
+
+async function cargar() {
+  if (!idReserva) {
+    document.getElementById("main-content").innerHTML = '<p style="text-align:center;padding:60px;color:red;">No se especificó código de reserva.</p>';
+    return;
+  }
+
+  const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
+
+  let reserva;
+
+  if (modoDemo) {
+    // Datos de demo
+    reserva = {
+      id_reserva: idReserva,
+      nombre_titular: "Carlos Mendoza",
+      email: "carlos@email.com",
+      telefono: "51987654321",
+      contacto: "WhatsApp",
+      estado: "Registrado",
+      fecha_registro: new Date().toLocaleString("es-PE"),
+      nro_documento: "12345678",
+      foto_url: "",
+      fecha_llegada: new Date().toISOString().split("T")[0],
+      aerolinea: "LATAM Airlines",
+      nro_vuelo: "LA2010",
+      hora_estimada: "14:30",
+      tours: "machu_picchu, valle_sagrado",
+      notas: "Celebración de aniversario. Solicitan habitación alta con vista.",
+      acompanantes: [{ nombre:"Laura Mendoza", tipo:"adulto", tipdoc:"DNI", nrodoc:"87654321" }]
+    };
+  } else {
+    try {
+      const resp = await fetch(SCRIPT_URL + "?action=obtener_reservas");
+      const data = await resp.json();
+      if (data.ok) {
+        reserva = data.reservas.find(r => r.id_reserva === idReserva);
+      }
+    } catch(e) {}
+  }
+
+  if (!reserva) {
+    document.getElementById("main-content").innerHTML = `
+      <div style="text-align:center;padding:60px;">
+        <span class="ms" style="font-size:48px;color:#d1c5af;">search_off</span>
+        <p style="margin-top:16px;color:#7f7663;">Reserva <strong>${idReserva}</strong> no encontrada.</p>
+        <a href="admin_panel.html" style="color:var(--primary);text-decoration:underline;font-size:14px;">Volver al panel</a>
+      </div>`;
+    return;
+  }
+
+  renderDetalle(reserva);
+}
+
+function renderDetalle(r) {
+  const fechaLlegada = r.fecha_llegada ? new Date(r.fecha_llegada + "T12:00:00").toLocaleDateString("es-PE",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "—";
+  const initials = (r.nombre_titular||"??").split(" ").map(n=>n[0]).join("").slice(0,2).toUpperCase();
+
+  const estadoClass = {Confirmado:"confirmado",Registrado:"registrado",Pendiente:"pendiente"}[r.estado] || "pendiente";
+
+  // Tours
+  const toursArr = (r.tours || "").split(",").map(t=>t.trim()).filter(Boolean);
+  const toursHtml = toursArr.length > 0
+    ? toursArr.map(t=>`<span class="tour-chip"><span class="ms" style="font-size:16px;">explore</span>${TOURS_MAP[t]||t}</span>`).join("")
+    : '<span style="color:#7f7663;font-size:14px;">Ninguno seleccionado</span>';
+
+  // Acompañantes
+  const acompanantes = Array.isArray(r.acompanantes) ? r.acompanantes : [];
+  const acompHtml = acompanantes.length > 0
+    ? acompanantes.map((a,i) => `
+      <div class="acomp-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <span class="ms" style="color:var(--secondary);">person</span>
+          <strong>${a.nombre || "Sin nombre"}</strong>
+          <span style="font-size:12px;background:var(--container);padding:2px 10px;border-radius:100px;">${a.tipo || "adulto"}</span>
+        </div>
+        <div style="font-size:13px;color:#7f7663;">${a.tipdoc||"DNI"}: ${a.nrodoc||"—"}</div>
+      </div>
+    `).join("")
+    : '<p style="color:#7f7663;font-size:14px;">Viaja solo</p>';
+
+  document.getElementById("main-content").innerHTML = `
+
+    <!-- Cabecera huésped -->
+    <div class="card" style="display:flex;flex-direction:column;gap:16px;">
+      <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--container);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:var(--primary);flex-shrink:0;">${initials}</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+            <h1 class="font-serif" style="font-size:22px;">${r.nombre_titular}</h1>
+            <span class="badge ${estadoClass}">${r.estado||"Pendiente"}</span>
+          </div>
+          <div style="font-size:13px;color:#7f7663;font-family:monospace;">${r.id_reserva}</div>
+          <div style="font-size:12px;color:#7f7663;margin-top:4px;">Registrado: ${r.fecha_registro||"—"}</div>
+        </div>
+      </div>
+
+      <!-- Acciones rápidas -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${r.telefono ? `
+        <a class="btn btn-wa" href="https://wa.me/${r.telefono}?text=${encodeURIComponent('Hola '+r.nombre_titular.split(' ')[0]+', te contactamos del Hotel Las Quenas sobre tu reserva '+r.id_reserva)}" target="_blank">
+          <span class="ms">chat</span> WhatsApp
+        </a>` : ""}
+        <a class="btn btn-ghost" href="mailto:${r.email||''}">
+          <span class="ms">mail</span> Email
+        </a>
+        <button class="btn btn-primary" onclick="window.print()">
+          <span class="ms">print</span> Imprimir
+        </button>
+      </div>
+
+      <!-- Cambiar estado -->
+      <div style="display:flex;align-items:center;gap:12px;background:var(--container-low);border-radius:10px;padding:12px 16px;">
+        <span style="font-size:13px;color:#4d4635;font-weight:600;">Cambiar estado:</span>
+        <select class="estado-select" onchange="cambiarEstado('${r.id_reserva}',this.value)">
+          <option value="Registrado" ${r.estado==='Registrado'?'selected':''}>Registrado</option>
+          <option value="Confirmado" ${r.estado==='Confirmado'?'selected':''}>Confirmado</option>
+          <option value="Pendiente" ${r.estado==='Pendiente'?'selected':''}>Pendiente</option>
+          <option value="Cancelado" ${r.estado==='Cancelado'?'selected':''}>Cancelado</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Contacto -->
+    <div class="card">
+      <div class="section-title"><span class="ms" style="color:var(--primary);">contact_phone</span> Contacto</div>
+      <div class="data-row"><span class="data-label">Email</span><span class="data-value">${r.email||"—"}</span></div>
+      <div class="data-row"><span class="data-label">Teléfono</span><span class="data-value">+${r.telefono||"—"}</span></div>
+      <div class="data-row"><span class="data-label">Canal preferido</span><span class="data-value">${r.contacto||"WhatsApp"}</span></div>
+    </div>
+
+    <!-- Vuelo -->
+    <div class="card">
+      <div class="section-title"><span class="ms" style="color:var(--primary);">flight</span> Información de Vuelo</div>
+      <div class="data-row"><span class="data-label">Llegada</span><span class="data-value">${fechaLlegada}</span></div>
+      <div class="data-row"><span class="data-label">Aerolínea</span><span class="data-value">${r.aerolinea||"—"}</span></div>
+      <div class="data-row"><span class="data-label">Vuelo</span><span class="data-value">${r.nro_vuelo||"—"}</span></div>
+      <div class="data-row"><span class="data-label">Hora estimada</span><span class="data-value">${r.hora_estimada||"—"}</span></div>
+    </div>
+
+    <!-- Documento -->
+    <div class="card">
+      <div class="section-title"><span class="ms" style="color:var(--primary);">badge</span> Documento de Identidad</div>
+      <div class="data-row"><span class="data-label">Número</span><span class="data-value">${r.nro_documento||"—"}</span></div>
+      <div style="margin-top:12px;">
+        ${r.foto_url ? `
+          <div class="foto-container">
+            <img src="${r.foto_url}" alt="Foto documento" onerror="this.parentElement.innerHTML='<div class=\\'foto-placeholder\\'>No se pudo cargar la imagen</div>'"/>
+          </div>
+          <a href="${r.foto_url}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;color:var(--primary);font-size:13px;text-decoration:none;">
+            <span class="ms" style="font-size:16px;">open_in_new</span> Ver en Drive
+          </a>
+        ` : `
+          <div class="foto-container">
+            <div class="foto-placeholder">
+              <span class="ms" style="font-size:36px;color:#d1c5af;">image_not_supported</span>
+              <p style="margin-top:8px;font-size:13px;">Foto no subida aún</p>
+            </div>
+          </div>
+        `}
+      </div>
+    </div>
+
+    <!-- Acompañantes -->
+    <div class="card">
+      <div class="section-title"><span class="ms" style="color:var(--primary);">group</span> Acompañantes (${acompanantes.length})</div>
+      ${acompHtml}
+    </div>
+
+    <!-- Tours -->
+    <div class="card">
+      <div class="section-title"><span class="ms" style="color:var(--primary);">explore</span> Tours de Interés</div>
+      <div>${toursHtml}</div>
+    </div>
+
+    ${r.notas ? `
+    <!-- Notas -->
+    <div class="card" style="border-left:4px solid var(--primary-c);">
+      <div class="section-title"><span class="ms" style="color:var(--primary-c);">notes</span> Notas Especiales</div>
+      <p style="font-size:14px;color:#4d4635;line-height:1.7;font-style:italic;">${r.notas}</p>
+    </div>` : ""}
+
+  `;
+}
+
+async function cambiarEstado(idR, estado) {
+  const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
+  if (!modoDemo) {
+    await fetch(SCRIPT_URL, {
+      method:"POST",
+      body:JSON.stringify({ action:"actualizar_estado", id_reserva:idR, estado }),
+      headers:{"Content-Type":"text/plain"}
+    });
+  }
+  mostrarToast("Estado actualizado: " + estado);
+}
+
+function mostrarToast(msg) {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  t.style.cssText = "position:fixed;bottom:24px;right:24px;background:#755b00;color:white;padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;";
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+
+cargar();
+</script>
+</body>
+</html>

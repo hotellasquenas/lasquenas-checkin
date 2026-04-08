@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Confirmación — Hotel Las Quenas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary:#755b00; --primary-c:#c9a227; --surface:#fff8f5;
+    --on-surface:#2f1500; --secondary:#865225; --container:#ffeadc;
+    --container-low:#fff1e9; --outline:#d1c5af; --error:#ba1a1a;
+    --success:#2e7d32;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Work Sans',sans-serif; background:var(--surface); color:var(--on-surface); min-height:100vh; }
+  .font-serif { font-family:'Noto Serif',serif; }
+  .ms { font-family:'Material Symbols Outlined'; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display:inline-block; line-height:1; }
+
+  .progress-bar { display:flex; gap:6px; align-items:center; justify-content:center; margin-bottom:32px; }
+  .progress-step { width:32px; height:4px; border-radius:2px; background:var(--outline); }
+  .progress-step.done { background:var(--primary); }
+  .progress-step.active { background:var(--primary-c); }
+
+  .resumen-card {
+    background:var(--container-low); border-radius:14px; padding:20px; margin-bottom:12px;
+    border-left:3px solid var(--primary);
+  }
+  .resumen-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--outline); font-size:14px; }
+  .resumen-row:last-child { border-bottom:none; }
+  .resumen-label { color:#4d4635; font-size:12px; text-transform:uppercase; letter-spacing:.06em; }
+  .resumen-value { font-weight:600; color:var(--on-surface); text-align:right; max-width:60%; }
+
+  .btn-enviar {
+    width:100%; padding:20px; background:linear-gradient(135deg,var(--primary),var(--primary-c));
+    color:white; border:none; border-radius:14px; font-family:'Work Sans',sans-serif;
+    font-size:16px; font-weight:700; letter-spacing:.06em; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    box-shadow:0 8px 28px rgba(117,91,0,0.3); transition:transform .15s;
+  }
+  .btn-enviar:active { transform:scale(.98); }
+  .btn-enviar:disabled { opacity:.6; cursor:not-allowed; }
+
+  /* Spinner */
+  .spinner {
+    width:22px; height:22px; border:2.5px solid rgba(255,255,255,.4);
+    border-top-color:white; border-radius:50%; animation:spin .7s linear infinite; display:none;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* Estado de éxito */
+  .success-screen {
+    display:none; text-align:center; padding:60px 24px;
+    animation:fadeIn .6s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+  .success-icon {
+    width:80px; height:80px; border-radius:50%; background:var(--container);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 24px;
+    font-size:40px;
+  }
+
+  .bottom-nav {
+    position:fixed; bottom:0; left:0; width:100%;
+    background:rgba(255,248,245,0.95); backdrop-filter:blur(16px);
+    border-top:1px solid var(--outline); display:flex;
+    justify-content:space-around; padding:10px 0 20px; z-index:100;
+  }
+  .nav-item {
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:6px 12px; border-radius:10px; text-decoration:none;
+    color:var(--secondary); font-size:10px; text-transform:uppercase; letter-spacing:.06em; opacity:.7;
+  }
+  .nav-item.active { background:var(--container); color:var(--primary); opacity:1; }
+
+  /* Pasos de envío */
+  .upload-step {
+    display:flex; align-items:center; gap:12px; padding:12px;
+    background:white; border-radius:10px; margin-bottom:8px; font-size:14px;
+  }
+  .step-icon { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .step-icon.pending { background:var(--outline); }
+  .step-icon.loading { background:var(--primary-c); animation:pulse .8s ease infinite alternate; }
+  .step-icon.done { background:var(--success); }
+  .step-icon.error { background:var(--error); }
+  @keyframes pulse { to { opacity:.6; } }
+</style>
+</head>
+<body>
+
+<header style="background:rgba(255,248,245,0.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--outline);padding:16px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;">
+  <a href="3_detalles_viaje.html" id="btn-back" style="color:var(--primary);text-decoration:none;display:flex;align-items:center;">
+    <span class="ms">arrow_back</span>
+  </a>
+  <div style="flex:1;text-align:center;">
+    <div class="font-serif" style="font-size:16px;color:var(--primary);font-weight:700;">Hotel Las Quenas</div>
+  </div>
+  <div style="width:28px;"></div>
+</header>
+
+<main style="max-width:640px;margin:0 auto;padding:24px 20px 140px;" id="main-content">
+
+  <div class="progress-bar">
+    <div class="progress-step done"></div>
+    <div class="progress-step done"></div>
+    <div class="progress-step done"></div>
+    <div class="progress-step active"></div>
+    <div class="progress-step"></div>
+  </div>
+
+  <!-- Formulario de confirmación -->
+  <div id="form-section">
+    <div style="margin-bottom:28px;">
+      <h1 class="font-serif" style="font-size:26px;margin-bottom:8px;">Confirmar Registro</h1>
+      <p style="color:#4d4635;font-size:14px;">Revise su información antes de enviar.</p>
+    </div>
+
+    <!-- Resumen huéspedes -->
+    <h3 class="font-serif" style="font-size:17px;margin-bottom:12px;">Huéspedes</h3>
+    <div class="resumen-card" id="resumen-huespedes">
+      <div style="color:#7f7663;font-size:13px;">Cargando datos...</div>
+    </div>
+
+    <!-- Resumen vuelo -->
+    <h3 class="font-serif" style="font-size:17px;margin:20px 0 12px;">Vuelo</h3>
+    <div class="resumen-card" id="resumen-vuelo">
+      <div style="color:#7f7663;font-size:13px;">Cargando datos...</div>
+    </div>
+
+    <!-- Tours -->
+    <h3 class="font-serif" style="font-size:17px;margin:20px 0 12px;">Tours de Interés</h3>
+    <div class="resumen-card" id="resumen-tours">
+      <div style="color:#7f7663;font-size:13px;">Ninguno seleccionado</div>
+    </div>
+
+    <!-- Código de reserva -->
+    <div style="background:var(--container);border-radius:14px;padding:20px;margin:20px 0;text-align:center;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#4d4635;margin-bottom:8px;">Su código de reserva</div>
+      <div id="codigo-display" class="font-serif" style="font-size:28px;font-weight:700;color:var(--primary);letter-spacing:.1em;"></div>
+      <div style="font-size:12px;color:#7f7663;margin-top:6px;">Guárdelo para cualquier consulta</div>
+    </div>
+
+    <!-- Pasos de envío -->
+    <div id="upload-steps" style="display:none;margin-bottom:20px;">
+      <h3 class="font-serif" style="font-size:16px;margin-bottom:12px;">Enviando información...</h3>
+      <div class="upload-step" id="step-datos">
+        <div class="step-icon pending" id="step-datos-icon"><span class="ms" style="font-size:14px;color:white;">upload</span></div>
+        <div>Guardando datos del huésped</div>
+      </div>
+      <div class="upload-step" id="step-fotos">
+        <div class="step-icon pending" id="step-fotos-icon"><span class="ms" style="font-size:14px;color:white;">photo_camera</span></div>
+        <div id="step-fotos-text">Subiendo fotos de documentos</div>
+      </div>
+      <div class="upload-step" id="step-done">
+        <div class="step-icon pending" id="step-done-icon"><span class="ms" style="font-size:14px;color:white;">check</span></div>
+        <div>Finalizando registro</div>
+      </div>
+    </div>
+
+    <!-- Legal -->
+    <p style="font-size:11px;color:#7f7663;text-align:center;margin-bottom:20px;line-height:1.6;">
+      Al confirmar, acepta que la información proporcionada es verídica según las normativas de hospedaje vigentes en la región de Cusco (Ley 29408). Sus datos están protegidos y serán usados exclusivamente para su estadía.
+    </p>
+
+    <!-- Botón enviar -->
+    <button class="btn-enviar" onclick="enviarRegistro()" id="btn-enviar">
+      <div class="spinner" id="spinner"></div>
+      <span class="ms" style="font-size:22px;font-variation-settings:'FILL' 1;" id="btn-icon">send</span>
+      <span id="btn-texto">CONFIRMAR Y ENVIAR</span>
+    </button>
+  </div>
+
+  <!-- Pantalla de éxito -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">
+      <span class="ms" style="font-size:44px;color:var(--primary);font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+    <h2 class="font-serif" style="font-size:28px;margin-bottom:12px;">¡Registro Completado!</h2>
+    <p style="color:#4d4635;font-size:15px;line-height:1.7;margin-bottom:32px;">
+      Hemos recibido su información correctamente.<br/>
+      Su habitación estará lista antes de su llegada.<br/>
+      Nos pondremos en contacto por WhatsApp.
+    </p>
+
+    <div style="background:var(--container);border-radius:14px;padding:20px;margin-bottom:32px;">
+      <div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#4d4635;margin-bottom:8px;">Código de Reserva</div>
+      <div id="codigo-success" class="font-serif" style="font-size:32px;font-weight:700;color:var(--primary);"></div>
+    </div>
+
+    <div style="background:#e8f5e9;border-radius:14px;padding:20px;margin-bottom:24px;text-align:left;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span class="ms" style="color:#2e7d32;font-variation-settings:'FILL' 1;">tips_and_updates</span>
+        <strong style="font-size:14px;color:#1b5e20;">¿Qué sigue?</strong>
+      </div>
+      <ul style="font-size:13px;color:#1b5e20;line-height:2;padding-left:4px;">
+        <li>• Recibirá confirmación por WhatsApp en las próximas horas</li>
+        <li>• Prepararemos su habitación según sus preferencias</li>
+        <li>• Le enviaremos información de los tours seleccionados</li>
+        <li>• El día de su llegada, pase directo a recepción sin filas</li>
+      </ul>
+    </div>
+
+    <a href="#" id="btn-whatsapp-final" 
+       style="display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;background:#25D366;color:white;border-radius:12px;text-decoration:none;font-weight:600;font-size:15px;margin-bottom:12px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.29-4.143c1.589.943 3.385 1.44 5.217 1.441 5.399 0 9.794-4.395 9.797-9.794 0-2.617-1.019-5.074-2.87-6.925s-4.309-2.87-6.925-2.87c-5.399 0-9.794 4.395-9.797 9.796-.001 1.83.479 3.618 1.386 5.187l-1.011 3.691 3.789-.993zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+      Contactar al Hotel por WhatsApp
+    </a>
+  </div>
+
+</main>
+
+<nav class="bottom-nav" id="bottom-nav">
+  <a class="nav-item" href="1_bienvenida.html" id="nav-home"><span class="ms">home</span>Inicio</a>
+  <a class="nav-item" href="2_registro_huespedes.html"><span class="ms">how_to_reg</span>Registro</a>
+  <a class="nav-item" href="3_detalles_viaje.html"><span class="ms">flight</span>Vuelo</a>
+  <a class="nav-item active" href="#"><span class="ms">check_circle</span>Confirmar</a>
+</nav>
+
+<script>
+// ── URL DEL APPS SCRIPT ────────────────────────────────────
+// Cambia esta URL por la que obtienes al implementar el Apps Script
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhVLLI4M87HdWaivMdt-pSWN5_SekVdJ_3X47Z1zO5fgg5AL8xTCQao7O6cYLO2uu2BA/exec";
+
+function getParam(k) { return new URLSearchParams(window.location.search).get(k); }
+const idReserva = getParam("r") || "sin_reserva";
+
+// Links de navegación
+const p = new URLSearchParams({ r: idReserva });
+if (getParam("n")) p.set("n", getParam("n"));
+document.getElementById("btn-back").href = "3_detalles_viaje.html?" + p.toString();
+document.getElementById("nav-home").href = "1_bienvenida.html?" + p.toString();
+
+// ── Cargar y mostrar resumen ───────────────────────────────
+function cargarResumen() {
+  document.getElementById("codigo-display").textContent = idReserva;
+
+  const datosH = JSON.parse(localStorage.getItem("quenas_" + idReserva + "_huespedes") || "{}");
+  const datosV = JSON.parse(localStorage.getItem("quenas_" + idReserva + "_vuelo") || "{}");
+
+  // Resumen huéspedes
+  if (datosH.nombre_titular) {
+    let html = `
+      <div class="resumen-row"><span class="resumen-label">Titular</span><span class="resumen-value">${datosH.nombre_titular}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Email</span><span class="resumen-value">${datosH.email || "—"}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Teléfono</span><span class="resumen-value">+${datosH.telefono || "—"}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Contacto</span><span class="resumen-value">${datosH.contacto_preferido || "WhatsApp"}</span></div>
+    `;
+    if (datosH.acompanantes && datosH.acompanantes.length > 0) {
+      html += `<div class="resumen-row"><span class="resumen-label">Acompañantes</span><span class="resumen-value">${datosH.acompanantes.map(a => a.nombre).join(", ")}</span></div>`;
+    }
+    const nFotos = (datosH.fotos || []).filter(f => f.dataUrl).length;
+    html += `<div class="resumen-row"><span class="resumen-label">Fotos documentos</span><span class="resumen-value">${nFotos} foto(s) en AVIF</span></div>`;
+    document.getElementById("resumen-huespedes").innerHTML = html;
+  }
+
+  // Resumen vuelo
+  if (datosV.fecha_llegada) {
+    const fecha = new Date(datosV.fecha_llegada + "T12:00:00");
+    const fechaStr = fecha.toLocaleDateString("es-PE", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+    document.getElementById("resumen-vuelo").innerHTML = `
+      <div class="resumen-row"><span class="resumen-label">Fecha</span><span class="resumen-value">${fechaStr}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Aerolínea</span><span class="resumen-value">${datosV.aerolinea}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Vuelo</span><span class="resumen-value">${datosV.nro_vuelo}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Hora estimada</span><span class="resumen-value">${datosV.hora_estimada}</span></div>
+      ${datosV.notas ? `<div class="resumen-row"><span class="resumen-label">Notas</span><span class="resumen-value">${datosV.notas}</span></div>` : ""}
+    `;
+  }
+
+  // Tours
+  const toursMap = {
+    machu_picchu:"Machu Picchu", valle_sagrado:"Valle Sagrado", vinicunca:"Montaña Vinicunca",
+    saqsaywaman:"Saqsaywaman", humantay:"Laguna Humantay", city_tour:"City Tour Cusco"
+  };
+  if (datosV.tours && datosV.tours.length > 0) {
+    document.getElementById("resumen-tours").innerHTML = datosV.tours.map(t =>
+      `<div class="resumen-row"><span class="resumen-value" style="font-weight:500;">✓ ${toursMap[t] || t}</span></div>`
+    ).join("");
+  }
+}
+
+// ── Enviar registro ────────────────────────────────────────
+async function enviarRegistro() {
+  const btn = document.getElementById("btn-enviar");
+  const spinner = document.getElementById("spinner");
+  const btnTexto = document.getElementById("btn-texto");
+  const btnIcon = document.getElementById("btn-icon");
+
+  btn.disabled = true;
+  spinner.style.display = "block";
+  btnIcon.style.display = "none";
+  btnTexto.textContent = "Enviando...";
+
+  document.getElementById("upload-steps").style.display = "block";
+
+  const datosH = JSON.parse(localStorage.getItem("quenas_" + idReserva + "_huespedes") || "{}");
+  const datosV = JSON.parse(localStorage.getItem("quenas_" + idReserva + "_vuelo") || "{}");
+
+  // Si no hay SCRIPT_URL configurado, simular envío exitoso
+  const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
+
+  try {
+    // PASO 1: Registrar datos principales
+    setStep("step-datos", "loading");
+    await delay(800);
+
+    if (!modoDemo) {
+      const payload = {
+        action: "registrar_huesped",
+        id_reserva: idReserva,
+        ...datosH,
+        ...datosV
+      };
+      const r = await fetch(SCRIPT_URL, {
+        method:"POST",
+        body: JSON.stringify(payload),
+        headers:{ "Content-Type":"text/plain" }
+      });
+      const result = await r.json();
+      if (!result.ok) throw new Error(result.error);
+    }
+    setStep("step-datos", "done");
+
+    // PASO 2: Subir fotos
+    setStep("step-fotos", "loading");
+    const fotos = (datosH.fotos || []).filter(f => f.dataUrl);
+
+    if (fotos.length > 0 && !modoDemo) {
+      for (let i = 0; i < fotos.length; i++) {
+        document.getElementById("step-fotos-text").textContent =
+          `Subiendo foto ${i+1} de ${fotos.length}...`;
+
+        await fetch(SCRIPT_URL, {
+          method:"POST",
+          body: JSON.stringify({
+            action: "subir_foto",
+            id_reserva: idReserva,
+            indice: fotos[i].indice,
+            tipo: i === 0 ? "titular" : "acompanante",
+            foto_base64: fotos[i].dataUrl
+          }),
+          headers:{ "Content-Type":"text/plain" }
+        });
+        await delay(500);
+      }
+    } else {
+      await delay(1000);
+    }
+    setStep("step-fotos", "done");
+
+    // PASO 3: Finalizar
+    setStep("step-done", "loading");
+    await delay(600);
+    setStep("step-done", "done");
+
+    await delay(400);
+
+    // Mostrar éxito
+    document.getElementById("form-section").style.display = "none";
+    const success = document.getElementById("success-screen");
+    success.style.display = "block";
+    document.getElementById("codigo-success").textContent = idReserva;
+
+    // Link WhatsApp al hotel
+    const nombreTitular = datosH.nombre_titular || "huésped";
+    const msgWa = `Hola, soy ${nombreTitular}. Acabo de completar mi pre check-in. Mi código de reserva es: *${idReserva}*`;
+    document.getElementById("btn-whatsapp-final").href =
+      `https://wa.me/51987341632?text=${encodeURIComponent(msgWa)}`;
+
+    // Limpiar localStorage
+    localStorage.removeItem("quenas_" + idReserva + "_huespedes");
+    localStorage.removeItem("quenas_" + idReserva + "_vuelo");
+    localStorage.removeItem("quenas_" + idReserva + "_meta");
+
+  } catch (err) {
+    setStep("step-datos", "error");
+    btn.disabled = false;
+    spinner.style.display = "none";
+    btnIcon.style.display = "block";
+    btnTexto.textContent = "REINTENTAR";
+    mostrarToast("Error al enviar. Intente nuevamente.", "error");
+  }
+}
+
+function setStep(id, estado) {
+  const icon = document.getElementById(id + "-icon");
+  icon.className = "step-icon " + estado;
+  const iconos = { pending:"upload", loading:"hourglass_top", done:"check", error:"close" };
+  icon.innerHTML = `<span class="ms" style="font-size:14px;color:white;">${iconos[estado]}</span>`;
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function mostrarToast(msg, tipo="ok") {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    background:${tipo==="ok"?"#755b00":"#ba1a1a"};color:white;padding:12px 20px;
+    border-radius:100px;font-size:13px;z-index:9999;max-width:90%;text-align:center;`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// Iniciar
+cargarResumen();
+</script>
+</body>
+</html>

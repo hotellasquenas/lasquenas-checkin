@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Enviar Invitación — Hotel Las Quenas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary: #755b00; --primary-c: #c9a227; --surface: #fff8f5;
+    --on-surface: #2f1500; --secondary: #865225; --container: #ffeadc;
+    --outline: #d1c5af;
+  }
+  body { font-family: 'Work Sans', sans-serif; background: var(--surface); color: var(--on-surface); min-height: 100vh; }
+  .font-serif { font-family: 'Noto Serif', serif; }
+  .ms { font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  input, select { outline: none; font-family: 'Work Sans', sans-serif; }
+  input:focus { border-color: var(--primary) !important; }
+
+  .link-box {
+    background: var(--container); border-radius: 12px; padding: 16px;
+    word-break: break-all; font-size: 13px; color: var(--secondary);
+    font-family: monospace; display: none;
+  }
+  .link-box.visible { display: block; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-c));
+    color: white; border: none; border-radius: 12px; padding: 16px 24px;
+    font-family: 'Work Sans', sans-serif; font-weight: 600; letter-spacing: .05em;
+    cursor: pointer; width: 100%; font-size: 15px; transition: opacity .2s, transform .1s;
+  }
+  .btn-primary:hover { opacity: .92; }
+  .btn-primary:active { transform: scale(.98); }
+  .btn-wa {
+    background: #25D366; color: white; border: none; border-radius: 12px;
+    padding: 14px 24px; font-family: 'Work Sans', sans-serif; font-weight: 600;
+    cursor: pointer; width: 100%; font-size: 15px; display: flex;
+    align-items: center; justify-content: center; gap: 10px; transition: opacity .2s;
+  }
+  .btn-wa:hover { opacity: .9; }
+  .field-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #4d4635; font-weight: 600; margin-bottom: 6px; display: block; }
+  .field-input { width: 100%; padding: 14px 16px; background: var(--container); border: 1px solid transparent; border-radius: 10px; font-size: 15px; color: var(--on-surface); transition: border-color .2s; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 100px; background: var(--container); font-size: 12px; color: var(--secondary); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header style="background: var(--surface); border-bottom: 1px solid var(--outline); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span class="ms" style="color:var(--primary);">hotel</span>
+    <span class="font-serif" style="font-size:18px; color:var(--primary); font-weight:700; letter-spacing:.1em;">Hotel Las Quenas</span>
+  </div>
+  <span style="font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--secondary);">Panel Recepción</span>
+</header>
+
+<main style="max-width: 640px; margin: 0 auto; padding: 32px 20px 100px;">
+
+  <div style="margin-bottom:32px;">
+    <h1 class="font-serif" style="font-size:28px; margin:0 0 8px; color:var(--on-surface);">Generar Invitación</h1>
+    <p style="color:#4d4635; font-size:14px; margin:0;">Crea el link personalizado de pre check-in para enviar al huésped por WhatsApp.</p>
+  </div>
+
+  <!-- Formulario -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+
+    <div>
+      <label class="field-label">Código de Reserva *</label>
+      <input class="field-input" id="inp-reserva" type="text" placeholder="Ej. QNS-2025-4821" oninput="actualizar()"/>
+      <p style="font-size:11px; color:#7f7663; margin:6px 0 0;">Si no tienes uno aún, el sistema lo generará automáticamente.</p>
+    </div>
+
+    <div>
+      <label class="field-label">Nombre del Huésped *</label>
+      <input class="field-input" id="inp-nombre" type="text" placeholder="Ej. María García" oninput="actualizar()"/>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div>
+        <label class="field-label">Fecha de Llegada</label>
+        <input class="field-input" id="inp-fecha" type="date" oninput="actualizar()"/>
+      </div>
+      <div>
+        <label class="field-label">Habitación</label>
+        <input class="field-input" id="inp-hab" type="text" placeholder="Ej. 204" oninput="actualizar()"/>
+      </div>
+    </div>
+
+    <div>
+      <label class="field-label">Teléfono WhatsApp del Huésped *</label>
+      <div style="display:flex; gap:8px;">
+        <select class="field-input" id="inp-codigo" style="width:110px; flex-shrink:0;" onchange="actualizar()">
+          <option value="51">PE +51</option>
+          <option value="54">AR +54</option>
+          <option value="56">CL +56</option>
+          <option value="57">CO +57</option>
+          <option value="1">US +1</option>
+          <option value="34">ES +34</option>
+          <option value="44">UK +44</option>
+          <option value="49">DE +49</option>
+          <option value="33">FR +33</option>
+          <option value="55">BR +55</option>
+        </select>
+        <input class="field-input" id="inp-tel" type="tel" placeholder="987 341 632" oninput="actualizar()"/>
+      </div>
+    </div>
+
+    <!-- Botón generar -->
+    <button class="btn-primary" onclick="generarLink()">
+      <span class="ms" style="vertical-align:middle; margin-right:8px;">link</span>
+      GENERAR LINK DE PRE CHECK-IN
+    </button>
+
+    <!-- Resultado -->
+    <div id="resultado" style="display:none;">
+
+      <div style="background:#fff1e9; border:1px solid #d1c5af; border-radius:12px; padding:20px; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+          <span class="ms" style="color:var(--primary); font-size:20px;" style="font-variation-settings:'FILL' 1;">check_circle</span>
+          <span style="font-weight:600; font-size:15px; color:var(--primary);">Link generado correctamente</span>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <div class="field-label" style="margin-bottom:6px;">Código de reserva</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="show-codigo" class="chip" style="font-size:14px; font-weight:600; font-family:monospace;"></span>
+            <button onclick="copiarCodigo()" style="background:none; border:none; cursor:pointer; color:var(--primary); font-size:12px; text-decoration:underline;">Copiar</button>
+          </div>
+        </div>
+
+        <div class="link-box visible" id="link-display"></div>
+        <button onclick="copiarLink()" style="background:none; border:none; cursor:pointer; color:var(--primary); font-size:12px; text-decoration:underline; margin-top:8px;">📋 Copiar link</button>
+      </div>
+
+      <!-- Mensaje WhatsApp preview -->
+      <div style="background:#e8f8ed; border-radius:12px; padding:20px; margin-bottom:16px;">
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#0a6c3b; font-weight:600; margin-bottom:12px;">Vista previa del mensaje</div>
+        <div id="msg-preview" style="font-size:14px; color:#1a3d2b; line-height:1.7; white-space:pre-line;"></div>
+      </div>
+
+      <button class="btn-wa" onclick="abrirWhatsApp()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.29-4.143c1.589.943 3.385 1.44 5.217 1.441 5.399 0 9.794-4.395 9.797-9.794 0-2.617-1.019-5.074-2.87-6.925s-4.309-2.87-6.925-2.87c-5.399 0-9.794 4.395-9.797 9.796-.001 1.83.479 3.618 1.386 5.187l-1.011 3.691 3.789-.993zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        ENVIAR POR WHATSAPP
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Historial reciente -->
+  <div style="margin-top:48px;">
+    <h2 class="font-serif" style="font-size:20px; margin:0 0 16px; color:var(--on-surface);">Links enviados hoy</h2>
+    <div id="historial" style="display:flex; flex-direction:column; gap:8px;">
+      <p style="color:#7f7663; font-size:14px;">Los links que generes hoy aparecerán aquí.</p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+let linkGenerado = "";
+let codigoReserva = "";
+let telCompleto = "";
+
+// Generar ID de reserva único
+function generarIdReserva() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const num = Math.floor(Math.random() * 9000) + 1000;
+  return "QNS-" + year + "-" + num;
+}
+
+function generarLink() {
+  const nombre = document.getElementById("inp-nombre").value.trim();
+  const tel = document.getElementById("inp-tel").value.trim();
+
+  if (!nombre || !tel) {
+    alert("Por favor completa el nombre y teléfono del huésped.");
+    return;
+  }
+
+  codigoReserva = document.getElementById("inp-reserva").value.trim() || generarIdReserva();
+  document.getElementById("inp-reserva").value = codigoReserva;
+
+  const fecha = document.getElementById("inp-fecha").value;
+  const hab = document.getElementById("inp-hab").value.trim();
+  const codigo = document.getElementById("inp-codigo").value;
+  telCompleto = codigo + tel.replace(/\D/g, "");
+
+  // Construir URL del pre check-in (relativa al mismo directorio)
+  const base = window.location.href.replace("5_invitacion_whatsapp.html", "");
+  const params = new URLSearchParams({
+    r: codigoReserva,
+    n: nombre,
+    ...(fecha && { f: fecha }),
+    ...(hab && { h: hab })
+  });
+  linkGenerado = base + "1_bienvenida.html?" + params.toString();
+
+  // Mostrar resultado
+  document.getElementById("show-codigo").textContent = codigoReserva;
+  document.getElementById("link-display").textContent = linkGenerado;
+
+  // Mensaje de WhatsApp
+  const msg = generarMensaje(nombre, fecha, hab);
+  document.getElementById("msg-preview").textContent = msg;
+
+  document.getElementById("resultado").style.display = "block";
+  document.getElementById("resultado").scrollIntoView({ behavior: "smooth" });
+
+  // Guardar en historial
+  guardarEnHistorial(codigoReserva, nombre, tel);
+}
+
+function generarMensaje(nombre, fecha, hab) {
+  const primerNombre = nombre.split(" ")[0];
+  let msg = `¡Hola ${primerNombre}! 👋\n\nSoy del *Hotel Las Quenas* en Cusco. Nos alegra mucho que nos hayas elegido para tu estadía.\n\nPara brindarte una bienvenida personalizada y agilizar tu check-in, te invitamos a completar tu registro previo con el siguiente enlace:\n\n🔗 ${linkGenerado}\n\n`;
+
+  if (fecha) {
+    const d = new Date(fecha + "T12:00:00");
+    const fechaStr = d.toLocaleDateString("es-PE", { weekday: "long", day: "numeric", month: "long" });
+    msg += `📅 Te esperamos el *${fechaStr}*\n`;
+  }
+  if (hab) msg += `🛏️ Tu habitación: *${hab}*\n`;
+
+  msg += `\nSolo toma 3 minutos y podrás llegar directamente a tu habitación sin esperar en recepción.\n\n¡Hasta pronto! 🏔️\n*Hotel Las Quenas — Cusco*`;
+  return msg;
+}
+
+function actualizar() {
+  // Actualizar si ya se generó
+  if (document.getElementById("resultado").style.display !== "none") {
+    generarLink();
+  }
+}
+
+function copiarLink() {
+  navigator.clipboard.writeText(linkGenerado).then(() => {
+    mostrarToastLocal("Link copiado ✓");
+  });
+}
+
+function copiarCodigo() {
+  navigator.clipboard.writeText(codigoReserva).then(() => {
+    mostrarToastLocal("Código copiado ✓");
+  });
+}
+
+function abrirWhatsApp() {
+  const nombre = document.getElementById("inp-nombre").value.trim();
+  const fecha = document.getElementById("inp-fecha").value;
+  const hab = document.getElementById("inp-hab").value.trim();
+  const msg = generarMensaje(nombre, fecha, hab);
+  const url = "https://wa.me/" + telCompleto + "?text=" + encodeURIComponent(msg);
+  window.open(url, "_blank");
+}
+
+function guardarEnHistorial(codigo, nombre, tel) {
+  const hist = JSON.parse(localStorage.getItem("quenas_historial_links") || "[]");
+  hist.unshift({ codigo, nombre, tel, ts: new Date().toLocaleTimeString("es-PE") });
+  localStorage.setItem("quenas_historial_links", JSON.stringify(hist.slice(0, 20)));
+  renderHistorial();
+}
+
+function renderHistorial() {
+  const hist = JSON.parse(localStorage.getItem("quenas_historial_links") || "[]");
+  const hoy = hist.filter(h => {
+    // Mostrar solo de hoy
+    return true; // simplificado
+  }).slice(0, 5);
+
+  const el = document.getElementById("historial");
+  if (!hoy.length) return;
+
+  el.innerHTML = hoy.map(h => `
+    <div style="background:var(--container); border-radius:10px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="font-weight:600; font-size:14px;">${h.nombre}</div>
+        <div style="font-size:11px; color:#7f7663; font-family:monospace;">${h.codigo} · ${h.ts}</div>
+      </div>
+      <span class="ms" style="color:var(--primary); cursor:pointer;" onclick="alert('${h.codigo}')">content_copy</span>
+    </div>
+  `).join("");
+}
+
+function mostrarToastLocal(msg) {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  t.style.cssText = "position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#755b00;color:white;padding:10px 20px;border-radius:100px;font-size:13px;z-index:9999;";
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// Cargar historial al inicio
+renderHistorial();
+</script>
+
+</body>
+</html>

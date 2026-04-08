@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bienvenido — Hotel Las Quenas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary: #755b00; --primary-c: #c9a227; --surface: #fff8f5;
+    --on-surface: #2f1500; --secondary: #865225; --container: #ffeadc;
+    --outline: #d1c5af; --error: #ba1a1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Work Sans', sans-serif; background: var(--surface); color: var(--on-surface); min-height: 100vh; }
+  .font-serif { font-family: 'Noto Serif', serif; }
+  .ms { font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display:inline-block; }
+
+  .hero {
+    position: relative; min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: flex-end; padding: 0 24px 48px; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(47,21,0,0.15) 0%, rgba(47,21,0,0.0) 40%, rgba(255,248,245,0.95) 75%, #fff8f5 100%);
+    z-index: 1;
+  }
+  .hero-img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 600px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; background: rgba(255,248,245,0.9); backdrop-filter: blur(8px);
+    border: 1px solid var(--outline); border-radius: 100px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--secondary); font-weight: 600; margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Noto Serif', serif; font-size: clamp(36px, 8vw, 64px);
+    line-height: 1.1; color: var(--on-surface); font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .hero h1 em { color: var(--primary); font-style: italic; }
+
+  .nombre-huesped {
+    font-family: 'Noto Serif', serif; font-size: 22px; color: var(--secondary);
+    margin-bottom: 24px; font-style: italic;
+  }
+
+  .info-card {
+    background: rgba(255,248,245,0.92); backdrop-filter: blur(12px);
+    border: 1px solid var(--outline); border-radius: 16px;
+    padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;
+  }
+  .info-icon { color: var(--primary); font-size: 28px; flex-shrink: 0; }
+
+  .btn-main {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 18px 24px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-c));
+    color: white; border-radius: 14px; font-family: 'Work Sans', sans-serif;
+    font-size: 15px; font-weight: 600; letter-spacing: .08em; text-decoration: none;
+    box-shadow: 0 8px 24px rgba(117,91,0,0.3); transition: transform .15s, box-shadow .15s;
+    cursor: pointer; border: none;
+  }
+  .btn-main:active { transform: scale(.97); box-shadow: 0 4px 12px rgba(117,91,0,0.2); }
+
+  .promesas { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 40px 0; }
+  .promesa-card {
+    background: var(--container); border-radius: 12px; padding: 16px 12px; text-align: center;
+  }
+  .promesa-card .icon { font-size: 28px; color: var(--primary); margin-bottom: 8px; }
+  .promesa-card h4 { font-family: 'Noto Serif', serif; font-size: 13px; margin-bottom: 4px; }
+  .promesa-card p { font-size: 11px; color: #4d4635; line-height: 1.4; }
+
+  .pasos {
+    background: var(--container); border-radius: 16px; padding: 24px; margin: 40px 0;
+  }
+  .paso {
+    display: flex; gap: 14px; align-items: flex-start; padding: 12px 0;
+    border-bottom: 1px solid var(--outline);
+  }
+  .paso:last-child { border-bottom: none; padding-bottom: 0; }
+  .paso-num {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--primary);
+    color: white; font-weight: 700; font-size: 14px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .paso-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .paso-info p { font-size: 12px; color: #4d4635; }
+
+  /* Nav bottom */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: rgba(255,248,245,0.92); backdrop-filter: blur(16px);
+    border-top: 1px solid var(--outline); display: flex;
+    justify-content: space-around; padding: 10px 0 20px; z-index: 100;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 6px 16px; border-radius: 10px; text-decoration: none; color: var(--secondary);
+    font-size: 10px; text-transform: uppercase; letter-spacing: .06em; opacity: .7;
+    transition: opacity .2s;
+  }
+  .nav-item.active { background: var(--container); color: var(--primary); opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <img class="hero-img" 
+    src="https://lh3.googleusercontent.com/aida/ADBb0ug7OfS5_0HzfQIZDfetQH4Q7zR8Ef9lwWLmSrDrLqJCnSMRbZeRNFqFmErgwyDKAaPcVyJrg0_9M3mffBHs5iDnnMpJyUm7HMMpOtOW2bcBda1UVq4zRBABN9aHTBJBOzJjrU6Ecog21cA_CDPO7ERcZNpDkYjcu0U0jUWRCNkmkdPeak0TrGye2DwtWa40A1CzxTKuC3_26Zw9zprjXfi_seKvYpaGPf-XbfBDbdCA5UjSQRzRPa_PLR8x8TrcEaAMBgz9NnZ6Ssg"
+    alt="Hotel Las Quenas"/>
+  <div class="hero-bg"></div>
+
+  <div class="hero-content">
+    <div class="badge">
+      <span class="ms" style="font-size:14px;">location_on</span>
+      Cusco, Perú · 3,399 m.s.n.m.
+    </div>
+
+    <h1>Donde la<br/>Tradición encuentra<br/>el <em>Lujo.</em></h1>
+
+    <p class="nombre-huesped" id="saludo-huesped" style="display:none;"></p>
+
+    <!-- Tarjeta info reserva (se muestra si hay params) -->
+    <div class="info-card" id="card-reserva" style="display:none;">
+      <span class="ms icon" style="font-variation-settings:'FILL' 1; color:var(--primary); font-size:32px;">confirmation_number</span>
+      <div>
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#4d4635; font-weight:600; margin-bottom:4px;">Reserva confirmada</div>
+        <div id="info-reserva-texto" style="font-size:14px; color:var(--on-surface); line-height:1.6;"></div>
+      </div>
+    </div>
+
+    <a class="btn-main" id="btn-checkin" href="2_registro_huespedes.html">
+      <span class="ms" style="font-size:20px;">how_to_reg</span>
+      COMENZAR PRE CHECK-IN
+      <span class="ms" style="font-size:20px;">arrow_forward</span>
+    </a>
+
+    <p style="font-size:11px; text-align:center; color:#7f7663; margin-top:12px;">Solo 3 minutos · Sin filas en recepción</p>
+  </div>
+</section>
+
+<!-- CONTENIDO PRINCIPAL -->
+<main style="max-width:640px; margin:0 auto; padding:40px 20px 120px;">
+
+  <!-- Promesas -->
+  <h2 class="font-serif" style="font-size:24px; margin-bottom:20px;">Una bienvenida diseñada para ti</h2>
+
+  <div class="promesas">
+    <div class="promesa-card">
+      <div class="icon ms" style="font-variation-settings:'FILL' 1;">speed</div>
+      <h4>Check-in Rápido</h4>
+      <p>Llega directamente a tu habitación sin esperar</p>
+    </div>
+    <div class="promesa-card">
+      <div class="icon ms" style="font-variation-settings:'FILL' 1;">self_improvement</div>
+      <h4>Preparamos Todo</h4>
+      <p>Tu habitación lista según tus preferencias</p>
+    </div>
+    <div class="promesa-card">
+      <div class="icon ms" style="font-variation-settings:'FILL' 1;">explore</div>
+      <h4>Tours Privados</h4>
+      <p>Elige tus experiencias antes de llegar</p>
+    </div>
+  </div>
+
+  <!-- Pasos del proceso -->
+  <div class="pasos">
+    <h3 class="font-serif" style="font-size:18px; margin-bottom:16px;">¿Cómo funciona?</h3>
+
+    <div class="paso">
+      <div class="paso-num">1</div>
+      <div class="paso-info">
+        <h4>Registro de huéspedes</h4>
+        <p>Datos de todos los que te acompañan y foto del documento</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-num">2</div>
+      <div class="paso-info">
+        <h4>Detalles de tu vuelo</h4>
+        <p>Aerolínea, número de vuelo y hora estimada de llegada</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-num">3</div>
+      <div class="paso-info">
+        <h4>Selección de tours</h4>
+        <p>Cuéntanos qué experiencias te interesan para Cusco</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-num">4</div>
+      <div class="paso-info">
+        <h4>¡Listo! Nos vemos al llegar</h4>
+        <p>Recibirás confirmación y nosotros lo preparamos todo</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Consejo altitud -->
+  <div style="background:linear-gradient(135deg, #fff1e9, #ffeadc); border-radius:16px; padding:24px; border-left:4px solid #af2f21;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+      <span class="ms" style="color:#af2f21; font-variation-settings:'FILL' 1;">health_and_safety</span>
+      <strong style="font-size:15px; color:#af2f21;">Consejo sobre el Soroche</strong>
+    </div>
+    <p style="font-size:14px; color:#4d4635; line-height:1.7; font-style:italic;">
+      Cusco está a 3,399 metros de altura. Te recomendamos descansar las primeras horas, 
+      hidratarte con nuestro mate de coca de cortesía y evitar comidas pesadas para 
+      una aclimatación placentera.
+    </p>
+  </div>
+
+</main>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <a class="nav-item active" href="1_bienvenida.html">
+    <span class="ms">home</span>Inicio
+  </a>
+  <a class="nav-item" href="2_registro_huespedes.html" id="nav-registro">
+    <span class="ms">how_to_reg</span>Registro
+  </a>
+  <a class="nav-item" href="#">
+    <span class="ms">restaurant</span>Comedor
+  </a>
+  <a class="nav-item" href="#">
+    <span class="ms">explore</span>Tours
+  </a>
+</nav>
+
+<script>
+// Leer parámetros de la URL
+function getParam(key) {
+  return new URLSearchParams(window.location.search).get(key);
+}
+
+const idReserva = getParam("r");
+const nombre = getParam("n");
+const fecha = getParam("f");
+const hab = getParam("h");
+
+// Personalizar según parámetros
+if (nombre) {
+  const primerNombre = nombre.split(" ")[0];
+  const saludo = document.getElementById("saludo-huesped");
+  saludo.textContent = "Bienvenido/a, " + primerNombre + " 🏔️";
+  saludo.style.display = "block";
+}
+
+if (idReserva) {
+  document.getElementById("card-reserva").style.display = "flex";
+  let textoInfo = "Código: <strong>" + idReserva + "</strong>";
+  if (fecha) {
+    const d = new Date(fecha + "T12:00:00");
+    textoInfo += "<br/>Llegada: " + d.toLocaleDateString("es-PE", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+  }
+  if (hab) textoInfo += "<br/>Habitación: <strong>" + hab + "</strong>";
+  document.getElementById("info-reserva-texto").innerHTML = textoInfo;
+}
+
+// Pasar parámetros a la siguiente página
+const btnCheckin = document.getElementById("btn-checkin");
+const navRegistro = document.getElementById("nav-registro");
+if (idReserva) {
+  const params = new URLSearchParams({ r: idReserva });
+  if (nombre) params.set("n", nombre);
+  if (fecha) params.set("f", fecha);
+  if (hab) params.set("h", hab);
+  const link = "2_registro_huespedes.html?" + params.toString();
+  btnCheckin.href = link;
+  navRegistro.href = link;
+}
+
+// Guardar en localStorage para uso posterior
+if (idReserva) {
+  localStorage.setItem("quenas_" + idReserva + "_meta", JSON.stringify({ idReserva, nombre, fecha, hab }));
+}
+</script>
+
+</body>
+</html>

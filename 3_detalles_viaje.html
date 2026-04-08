@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Detalles de Vuelo — Hotel Las Quenas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary: #755b00; --primary-c: #c9a227; --surface: #fff8f5;
+    --on-surface: #2f1500; --secondary: #865225; --container: #ffeadc;
+    --container-low: #fff1e9; --outline: #d1c5af; --error: #ba1a1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Work Sans', sans-serif; background: var(--surface); color: var(--on-surface); min-height: 100vh; }
+  .font-serif { font-family: 'Noto Serif', serif; }
+  .ms { font-family: 'Material Symbols Outlined'; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display:inline-block; line-height:1; }
+
+  .field-label { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#4d4635; font-weight:600; margin-bottom:6px; display:block; }
+  .field-input {
+    width:100%; padding:14px 16px; background:white; border:1.5px solid var(--outline);
+    border-radius:10px; font-size:15px; color:var(--on-surface); transition:border-color .2s;
+    font-family:'Work Sans',sans-serif; outline:none;
+  }
+  .field-input:focus { border-color:var(--primary); }
+  .field-input.error { border-color:var(--error); }
+
+  .btn-primary {
+    width:100%; padding:18px; background:linear-gradient(135deg,var(--primary),var(--primary-c));
+    color:white; border:none; border-radius:14px; font-family:'Work Sans',sans-serif;
+    font-size:15px; font-weight:600; letter-spacing:.06em; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    transition:transform .15s; box-shadow:0 6px 20px rgba(117,91,0,0.25);
+  }
+  .btn-primary:active { transform:scale(.98); }
+
+  .progress-bar { display:flex; gap:6px; align-items:center; justify-content:center; margin-bottom:32px; }
+  .progress-step { width:32px; height:4px; border-radius:2px; background:var(--outline); transition:background .3s; }
+  .progress-step.done { background:var(--primary); }
+  .progress-step.active { background:var(--primary-c); }
+
+  .tour-card {
+    background:white; border:1.5px solid var(--outline); border-radius:14px;
+    padding:20px; cursor:pointer; transition:all .2s; position:relative;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .tour-card:hover { border-color:var(--primary-c); background:var(--container-low); }
+  .tour-card.selected { border-color:var(--primary); background:var(--container-low); }
+  .tour-card.selected::after {
+    content:''; position:absolute; top:12px; right:12px;
+    width:20px; height:20px; border-radius:50%; background:var(--primary);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+    background-size:14px; background-repeat:no-repeat; background-position:center;
+  }
+  .tour-icon { font-size:32px; color:var(--primary); }
+  .tour-name { font-family:'Noto Serif',serif; font-size:16px; font-weight:700; }
+  .tour-desc { font-size:13px; color:#4d4635; line-height:1.5; }
+
+  .altitud-card {
+    background:linear-gradient(135deg,#fff1e9,#ffeadc); border-radius:16px;
+    border-left:4px solid #af2f21; padding:20px; display:flex; gap:14px;
+    align-items:flex-start;
+  }
+
+  .bottom-nav {
+    position:fixed; bottom:0; left:0; width:100%;
+    background:rgba(255,248,245,0.95); backdrop-filter:blur(16px);
+    border-top:1px solid var(--outline); display:flex;
+    justify-content:space-around; padding:10px 0 20px; z-index:100;
+  }
+  .nav-item {
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:6px 12px; border-radius:10px; text-decoration:none;
+    color:var(--secondary); font-size:10px; text-transform:uppercase; letter-spacing:.06em;
+    opacity:.7;
+  }
+  .nav-item.active { background:var(--container); color:var(--primary); opacity:1; }
+</style>
+</head>
+<body>
+
+<header style="background:rgba(255,248,245,0.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--outline);padding:16px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50;">
+  <a href="2_registro_huespedes.html" id="btn-back" style="color:var(--primary);background:none;border:none;cursor:pointer;display:flex;align-items:center;text-decoration:none;">
+    <span class="ms">arrow_back</span>
+  </a>
+  <div style="flex:1;text-align:center;">
+    <div class="font-serif" style="font-size:16px;color:var(--primary);font-weight:700;">Hotel Las Quenas</div>
+  </div>
+  <div style="width:28px;"></div>
+</header>
+
+<main style="max-width:640px;margin:0 auto;padding:24px 20px 140px;">
+
+  <div class="progress-bar">
+    <div class="progress-step done"></div>
+    <div class="progress-step done"></div>
+    <div class="progress-step active"></div>
+    <div class="progress-step"></div>
+    <div class="progress-step"></div>
+  </div>
+
+  <div style="margin-bottom:28px;">
+    <h1 class="font-serif" style="font-size:26px;margin:0 0 8px;">Detalles de su Llegada</h1>
+    <p style="color:#4d4635;font-size:14px;">Necesitamos estos datos para coordinar su bienvenida perfecta.</p>
+  </div>
+
+  <!-- ── VUELO ── -->
+  <section style="background:var(--container-low);border-radius:16px;padding:24px;margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <span class="ms" style="color:var(--primary);font-size:24px;">flight</span>
+      <h2 class="font-serif" style="font-size:18px;">Información de Vuelo</h2>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="grid-column:1/-1;">
+        <label class="field-label">Fecha de Llegada *</label>
+        <input class="field-input" id="fecha-llegada" type="date" id="fecha-llegada"/>
+      </div>
+      <div>
+        <label class="field-label">Aerolínea *</label>
+        <input class="field-input" id="aerolinea" type="text" placeholder="Ej. LATAM, Avianca"/>
+      </div>
+      <div>
+        <label class="field-label">Número de Vuelo *</label>
+        <input class="field-input" id="nro-vuelo" type="text" placeholder="Ej. LA2010" style="text-transform:uppercase;"/>
+      </div>
+      <div style="grid-column:1/-1;">
+        <label class="field-label">Hora Estimada de Llegada *</label>
+        <input class="field-input" id="hora-vuelo" type="time"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ALTITUD ── -->
+  <div class="altitud-card" style="margin-bottom:24px;">
+    <span class="ms" style="color:#af2f21;font-size:28px;font-variation-settings:'FILL' 1;flex-shrink:0;">health_and_safety</span>
+    <div>
+      <strong style="font-size:15px;color:#af2f21;display:block;margin-bottom:6px;">Consejo sobre el Soroche</strong>
+      <p style="font-size:13px;color:#4d4635;line-height:1.7;font-style:italic;">
+        Cusco se encuentra a 3,399 metros de altura. Le recomendamos descansar las primeras horas, 
+        hidratarse con nuestro mate de coca de cortesía y evitar comidas pesadas 
+        para una aclimatación placentera.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── TOURS ── -->
+  <section style="margin-bottom:24px;">
+    <div style="margin-bottom:16px;">
+      <h2 class="font-serif" style="font-size:22px;margin-bottom:6px;">Experiencias en Cusco</h2>
+      <p style="color:#4d4635;font-size:14px;">¿Qué tours te interesan? (Selecciona varios, te enviaremos información antes de tu llegada)</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="tours-grid">
+      <!-- Se genera por JS -->
+    </div>
+  </section>
+
+  <!-- ── NOTAS ESPECIALES ── -->
+  <section style="margin-bottom:32px;">
+    <label class="field-label">Notas Especiales o Requerimientos</label>
+    <textarea class="field-input" id="notas" rows="4" placeholder="Ej. Alergias alimentarias, necesidad de silla de ruedas, celebración especial..."
+      style="resize:vertical;min-height:100px;"></textarea>
+  </section>
+
+  <!-- ── CONTINUAR ── -->
+  <button class="btn-primary" onclick="continuar()" id="btn-continuar">
+    <span id="btn-texto">CONTINUAR</span>
+    <span class="ms">arrow_forward</span>
+  </button>
+  <p style="text-align:center;font-size:11px;color:#7f7663;margin-top:12px;text-transform:uppercase;letter-spacing:.06em;">Paso 3 de 5 · Detalles de llegada</p>
+
+</main>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="1_bienvenida.html" id="nav-home"><span class="ms">home</span>Inicio</a>
+  <a class="nav-item" href="2_registro_huespedes.html" id="nav-reg"><span class="ms">how_to_reg</span>Registro</a>
+  <a class="nav-item active" href="#"><span class="ms">flight</span>Vuelo</a>
+  <a class="nav-item" href="#"><span class="ms">explore</span>Tours</a>
+</nav>
+
+<script>
+function getParam(k) { return new URLSearchParams(window.location.search).get(k); }
+const idReserva = getParam("r") || "sin_reserva";
+
+// Actualizar links back
+const params = new URLSearchParams({ r: idReserva });
+if (getParam("n")) params.set("n", getParam("n"));
+if (getParam("f")) params.set("f", getParam("f"));
+document.getElementById("btn-back").href = "2_registro_huespedes.html?" + params.toString();
+document.getElementById("nav-home").href = "1_bienvenida.html?" + params.toString();
+document.getElementById("nav-reg").href = "2_registro_huespedes.html?" + params.toString();
+
+// Precargar fecha si vino en la URL
+const fechaParam = getParam("f");
+if (fechaParam) document.getElementById("fecha-llegada").value = fechaParam;
+
+// ── Tours ──────────────────────────────────────────────────
+const TOURS = [
+  { id:"machu_picchu",   nombre:"Machu Picchu",      icono:"mountain_flag", desc:"La ciudadela inca más famosa del mundo" },
+  { id:"valle_sagrado",  nombre:"Valle Sagrado",      icono:"landscape",     desc:"Pisac, Ollantaytambo y el río Urubamba" },
+  { id:"vinicunca",      nombre:"Montaña Vinicunca",  icono:"palette",       desc:"Los colores naturales de la cordillera" },
+  { id:"saqsaywaman",    nombre:"Saqsaywaman",        icono:"fort",          desc:"La fortaleza inca sobre Cusco" },
+  { id:"humantay",       nombre:"Laguna Humantay",    icono:"water",         desc:"Laguna glacial a 4,200 m.s.n.m." },
+  { id:"city_tour",      nombre:"City Tour Cusco",    icono:"location_city", desc:"El corazón del Imperio Inca" }
+];
+
+let toursSeleccionados = new Set();
+
+function renderTours() {
+  const grid = document.getElementById("tours-grid");
+  grid.innerHTML = TOURS.map(t => `
+    <div class="tour-card ${toursSeleccionados.has(t.id) ? 'selected' : ''}" 
+         onclick="toggleTour('${t.id}')" id="tour-${t.id}">
+      <span class="ms tour-icon" style="font-variation-settings:'FILL' 1;">${t.icono}</span>
+      <div class="tour-name">${t.nombre}</div>
+      <div class="tour-desc">${t.desc}</div>
+    </div>
+  `).join("");
+}
+
+function toggleTour(id) {
+  if (toursSeleccionados.has(id)) {
+    toursSeleccionados.delete(id);
+  } else {
+    toursSeleccionados.add(id);
+  }
+  renderTours();
+}
+
+// ── Continuar ──────────────────────────────────────────────
+function continuar() {
+  const fecha = document.getElementById("fecha-llegada").value;
+  const aerolinea = document.getElementById("aerolinea").value.trim();
+  const nroVuelo = document.getElementById("nro-vuelo").value.trim();
+  const hora = document.getElementById("hora-vuelo").value;
+
+  let valido = true;
+  ["fecha-llegada","aerolinea","nro-vuelo","hora-vuelo"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.classList.add("error"); valido = false; }
+    else el.classList.remove("error");
+  });
+
+  if (!valido) {
+    mostrarToast("Por favor completa los datos del vuelo.", "error");
+    return;
+  }
+
+  const datosVuelo = {
+    fecha_llegada: fecha,
+    aerolinea: aerolinea,
+    nro_vuelo: nroVuelo.toUpperCase(),
+    hora_estimada: hora,
+    tours: Array.from(toursSeleccionados),
+    notas: document.getElementById("notas").value.trim()
+  };
+
+  localStorage.setItem("quenas_" + idReserva + "_vuelo", JSON.stringify(datosVuelo));
+
+  const p = new URLSearchParams({ r: idReserva });
+  if (getParam("n")) p.set("n", getParam("n"));
+  window.location.href = "4_confirmacion.html?" + p.toString();
+}
+
+function mostrarToast(msg, tipo="ok") {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    background:${tipo==="ok"?"#755b00":"#ba1a1a"};color:white;padding:12px 20px;
+    border-radius:100px;font-size:13px;z-index:9999;max-width:90%;text-align:center;`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+renderTours();
+</script>
+</body>
+</html>
