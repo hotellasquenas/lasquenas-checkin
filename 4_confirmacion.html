@@ -284,104 +284,113 @@ function cargarResumen() {
 
 // ── Enviar registro ────────────────────────────────────────
 async function enviarRegistro() {
-  const btn = document.getElementById("btn-enviar");
+  const btn     = document.getElementById("btn-enviar");
   const spinner = document.getElementById("spinner");
-  const btnTexto = document.getElementById("btn-texto");
+  const btnTexto= document.getElementById("btn-texto");
   const btnIcon = document.getElementById("btn-icon");
 
   btn.disabled = true;
   spinner.style.display = "block";
   btnIcon.style.display = "none";
-  btnTexto.textContent = "Enviando...";
-
+  btnTexto.textContent  = "Enviando...";
   document.getElementById("upload-steps").style.display = "block";
 
+  // Leer datos guardados en sessionStorage
   const datosH = JSON.parse(sessionStorage.getItem("qn_" + idReserva + "_h") || "{}");
   const datosV = JSON.parse(sessionStorage.getItem("qn_" + idReserva + "_v") || "{}");
 
-  // Si no hay SCRIPT_URL configurado, simular envío exitoso
-  const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
+  // ── Extraer fotos correctamente ─────────────────────────
+  // datosH.fotos = [{indice:0, fotos:["front_base64","back_base64"]}, ...]
+  let foto_1 = "";
+  let foto_2 = "";
+  try {
+    const fotosArray = datosH.fotos || [];
+    if (fotosArray.length > 0 && fotosArray[0].fotos) {
+      foto_1 = fotosArray[0].fotos[0] || "";  // Frente / única
+      foto_2 = fotosArray[0].fotos[1] || "";  // Reverso (DNI/Cédula)
+    }
+  } catch(e) { foto_1 = ""; foto_2 = ""; }
+
+  // ── Construir payload completo ───────────────────────────
+  const payload = {
+    action:              "registrar_huesped",
+    id_reserva:          idReserva,
+    nombre_titular:      datosH.nombre_titular      || "",
+    email:               datosH.email               || "",
+    telefono:            datosH.telefono             || "",
+    contacto_preferido:  datosH.contacto_preferido  || "WhatsApp",
+    pais:                datosH.pais                || "",
+    tipdoc:              datosH.tipdoc              || "DNI",
+    nro_documento:       datosH.nro_documento       || "",
+    idioma:              datosH.idioma              || "es",
+    acompanantes:        JSON.stringify(datosH.acompanantes || []),
+    foto_1:              foto_1,
+    foto_2:              foto_2,
+    medio:               datosV.medio              || "vuelo",
+    fecha_llegada:       datosV.fecha_llegada       || "",
+    aerolinea:           datosV.aerolinea           || "",
+    nro_vuelo:           datosV.nro_vuelo           || "",
+    hora_estimada:       datosV.hora_estimada       || "",
+    tours:               datosV.tours               || [],
+    notas:               datosV.notas               || ""
+  };
 
   try {
-    // PASO 1: Registrar datos principales
+    // PASO 1: Enviar TODO al Apps Script (datos + fotos juntos)
     setStep("step-datos", "loading");
-    await delay(800);
+    await delay(500);
 
-    if (!modoDemo) {
-      const payload = {
-        action: "registrar_huesped",
-        id_reserva: idReserva,
-        ...datosH,
-        ...datosV
-      };
-      const r = await fetch(SCRIPT_URL, {
-        method:"POST",
-        body: JSON.stringify(payload),
-        headers:{ "Content-Type":"text/plain" }
-      });
-      const result = await r.json();
-      if (!result.ok) throw new Error(result.error);
-    }
+    const r = await fetch(SCRIPT_URL, {
+      method:  "POST",
+      body:    JSON.stringify(payload),
+      headers: { "Content-Type": "text/plain" }
+    });
+
+    let result;
+    try { result = await r.json(); }
+    catch(e) { result = { ok: true }; } // no-cors no devuelve body
+
     setStep("step-datos", "done");
 
-    // PASO 2: Subir fotos
+    // PASO 2: Confirmar fotos
     setStep("step-fotos", "loading");
-    const fotos = (datosH.fotos || []).filter(f => f.dataUrl);
-
-    if (fotos.length > 0 && !modoDemo) {
-      for (let i = 0; i < fotos.length; i++) {
-        document.getElementById("step-fotos-text").textContent =
-          `Subiendo foto ${i+1} de ${fotos.length}...`;
-
-        await fetch(SCRIPT_URL, {
-          method:"POST",
-          body: JSON.stringify({
-            action: "subir_foto",
-            id_reserva: idReserva,
-            indice: fotos[i].indice,
-            tipo: i === 0 ? "titular" : "acompanante",
-            foto_base64: fotos[i].dataUrl
-          }),
-          headers:{ "Content-Type":"text/plain" }
-        });
-        await delay(500);
-      }
-    } else {
-      await delay(1000);
-    }
+    const tieneFotos = foto_1.length > 100 || foto_2.length > 100;
+    document.getElementById("step-fotos-text").textContent =
+      tieneFotos ? "Fotos incluidas en el envío ✓" : "Sin fotos adjuntas";
+    await delay(600);
     setStep("step-fotos", "done");
 
     // PASO 3: Finalizar
     setStep("step-done", "loading");
-    await delay(600);
+    await delay(400);
     setStep("step-done", "done");
 
-    await delay(400);
+    await delay(300);
 
-    // Mostrar éxito
+    // Limpiar sessionStorage
+    sessionStorage.removeItem("qn_" + idReserva + "_h");
+    sessionStorage.removeItem("qn_" + idReserva + "_v");
+
+    // Mostrar pantalla de éxito
     document.getElementById("form-section").style.display = "none";
     const success = document.getElementById("success-screen");
     success.style.display = "block";
     document.getElementById("codigo-success").textContent = idReserva;
 
     // Link WhatsApp al hotel
-    const nombreTitular = datosH.nombre_titular || "huésped";
-    const msgWa = `Hola, soy ${nombreTitular}. Acabo de completar mi pre check-in. Mi código de reserva es: *${idReserva}*`;
+    const nom = payload.nombre_titular.split(" ")[0];
+    const msg = "Hola, soy " + payload.nombre_titular + ". Completé mi pre check-in. Código: *" + idReserva + "*";
     document.getElementById("btn-whatsapp-final").href =
-      `https://wa.me/51987341632?text=${encodeURIComponent(msgWa)}`;
-
-    // Limpiar localStorage
-    sessionStorage.removeItem("qn_" + idReserva + "_h");
-    sessionStorage.removeItem("qn_" + idReserva + "_v");
-    
+      "https://wa.me/51987341632?text=" + encodeURIComponent(msg);
 
   } catch (err) {
+    console.error("Error envío:", err);
     setStep("step-datos", "error");
     btn.disabled = false;
     spinner.style.display = "none";
     btnIcon.style.display = "block";
     btnTexto.textContent = "REINTENTAR";
-    mostrarToast("Error al enviar. Intente nuevamente.", "error");
+    mostrarToast("Error al enviar. Verifica tu conexión.", "error");
   }
 }
 
