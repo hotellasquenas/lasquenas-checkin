@@ -231,55 +231,67 @@ let reservasGlobal = [];
 let filtroActual = "todos";
 
 // ── Cargar datos ───────────────────────────────────────────
-async function cargarDatos() {
+function cargarDatos() {
   const icon = document.getElementById("refresh-icon");
   icon.style.animation = "spin 1s linear infinite";
 
-  const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
+  // JSONP: evita el bloqueo CORS del navegador
+  const callbackName = "qnCallback_" + Date.now();
+  const script = document.createElement("script");
 
-  try {
-    let reservas = [];
+  window[callbackName] = function(data) {
+    delete window[callbackName];
+    document.body.removeChild(script);
+    icon.style.animation = "none";
 
-    if (modoDemo) {
-      // Datos de demo para mostrar cómo funciona
-      const hoy = new Date().toISOString().split("T")[0];
-      reservas = [
-        { id_reserva:"QNS-2025-1234", nombre_titular:"Carlos Mendoza", email:"carlos@email.com", telefono:"51987654321", contacto:"WhatsApp", estado:"Confirmado", fecha_llegada:hoy, aerolinea:"LATAM", nro_vuelo:"LA2010", hora_estimada:"14:30", tours:"Machu Picchu, Valle Sagrado", foto_url:"", acompanantes:[], fecha_registro:new Date().toLocaleString("es-PE") },
-        { id_reserva:"QNS-2025-2567", nombre_titular:"María González", email:"maria@email.com", telefono:"54911234567", contacto:"WhatsApp", estado:"Registrado", fecha_llegada:hoy, aerolinea:"Avianca", nro_vuelo:"AV842", hora_estimada:"18:45", tours:"Vinicunca", foto_url:"", acompanantes:[{nombre:"Luis González", tipo:"adulto"}], fecha_registro:new Date().toLocaleString("es-PE") },
-        { id_reserva:"QNS-2025-3891", nombre_titular:"James Smith", email:"james@email.com", telefono:"14155552671", contacto:"WhatsApp", estado:"Pendiente", fecha_llegada:"2025-03-20", aerolinea:"American", nro_vuelo:"AA901", hora_estimada:"11:00", tours:"Machu Picchu, Saqsaywaman", foto_url:"", acompanantes:[], fecha_registro:"15/03/2025 09:12" }
-      ];
+    if (data && data.ok && data.reservas) {
+      reservasGlobal = data.reservas;
+      actualizarEstadisticas(data.reservas);
+      renderTabla(data.reservas);
+      document.getElementById("ultima-actualizacion").textContent =
+        "Actualizado: " + new Date().toLocaleTimeString("es-PE");
+      actualizarDrive(data.reservas.length);
     } else {
-      const resp = await fetch(SCRIPT_URL + "?action=obtener_reservas");
-      const data = await resp.json();
-      if (data.ok) reservas = data.reservas;
+      mostrarErrorConexion();
     }
+  };
 
-    reservasGlobal = reservas;
-    actualizarEstadisticas(reservas);
-    renderTabla(reservas);
+  script.onerror = function() {
+    delete window[callbackName];
+    document.body.removeChild(script);
+    icon.style.animation = "none";
+    mostrarErrorConexion();
+  };
 
-    document.getElementById("ultima-actualizacion").textContent =
-      "Actualizado: " + new Date().toLocaleTimeString("es-PE");
+  script.src = SCRIPT_URL + "?action=obtener_reservas&callback=" + callbackName + "&t=" + Date.now();
+  document.body.appendChild(script);
+}
 
-    // Simular info de Drive
-    const totalFotos = reservas.length * 1.2;
-    const gb = Math.min(totalFotos * 0.15 / 1000, 15);
-    const pct = Math.round(gb / 15 * 100 * 10) / 10;
-    document.getElementById("drive-fill").style.width = pct + "%";
-    document.getElementById("drive-percent").textContent = pct + "% usado";
-    document.getElementById("drive-texto").textContent =
-      `${(gb).toFixed(2)} GB de 15 GB · ${reservas.length * Math.round(1 + (reservas.reduce((a,r)=>a+(r.acompanantes||[]).length,0)/reservas.length||0))} fotos AVIF guardadas`;
+function actualizarDrive(nReservas) {
+  const gb  = Math.min(nReservas * 0.15 / 1000, 15).toFixed(3);
+  const pct = Math.round(gb / 15 * 100 * 10) / 10;
+  const fill = document.getElementById("drive-fill");
+  const pctEl = document.getElementById("drive-percent");
+  const textoEl = document.getElementById("drive-texto");
+  if (fill)   fill.style.width = pct + "%";
+  if (pctEl)  pctEl.textContent = pct + "% usado";
+  if (textoEl) textoEl.textContent =
+    gb + " GB de 15 GB · " + (nReservas * 2) + " fotos AVIF guardadas";
+}
 
-  } catch (err) {
-    document.getElementById("tabla-body").innerHTML = `
-      <div class="spinner-full" style="flex-direction:column;gap:8px;">
-        <span class="ms" style="font-size:32px;color:var(--error);">error</span>
-        <p>No se pudo conectar al servidor.</p>
-        <p style="font-size:12px;">Verifica la URL del Apps Script en admin_panel.html</p>
-      </div>`;
-  }
-
-  icon.style.animation = "none";
+function mostrarErrorConexion() {
+  document.getElementById("tabla-body").innerHTML = `
+    <div class="spinner-full" style="flex-direction:column;gap:12px;">
+      <span class="ms" style="font-size:40px;color:var(--error);">wifi_off</span>
+      <p style="color:#7f7663;font-size:15px;font-weight:600;">No se pudo conectar al servidor</p>
+      <p style="color:#7f7663;font-size:13px;">Verifica que el Apps Script esté publicado correctamente</p>
+      <a href="" target="_blank" 
+         style="background:var(--container);border:none;border-radius:10px;padding:10px 20px;
+         color:var(--primary);font-weight:600;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+        <span class="ms" style="font-size:18px;">table_chart</span>
+        Ver datos directamente en Google Sheets
+      </a>
+    </div>`;
 }
 
 function actualizarEstadisticas(reservas) {
@@ -412,15 +424,14 @@ function filtrarTabla() {
 // ── Cambiar estado ─────────────────────────────────────────
 async function cambiarEstado(idReserva, estado) {
   if (!estado) return;
-  const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
-
-  if (!modoDemo) {
+  try {
     await fetch(SCRIPT_URL, {
-      method:"POST",
-      body:JSON.stringify({ action:"actualizar_estado", id_reserva:idReserva, estado }),
-      headers:{"Content-Type":"text/plain"}
+      method: "POST",
+      body: JSON.stringify({ action:"actualizar_estado", id_reserva:idReserva, estado }),
+      headers: { "Content-Type":"text/plain" },
+      mode: "no-cors"
     });
-  }
+  } catch(e) { /* silencioso */ }
 
   // Actualizar localmente
   const r = reservasGlobal.find(r => r.id_reserva === idReserva);

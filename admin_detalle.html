@@ -74,57 +74,41 @@ const TOURS_MAP = {
   saqsaywaman:"Saqsaywaman", humantay:"Laguna Humantay", city_tour:"City Tour Cusco"
 };
 
-async function cargar() {
+function cargar() {
   if (!idReserva) {
     document.getElementById("main-content").innerHTML = '<p style="text-align:center;padding:60px;color:red;">No se especificó código de reserva.</p>';
     return;
   }
 
-  const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
+  const callbackName = "detCargar_" + Date.now();
+  const script = document.createElement("script");
 
-  let reserva;
-
-  if (modoDemo) {
-    // Datos de demo
-    reserva = {
-      id_reserva: idReserva,
-      nombre_titular: "Carlos Mendoza",
-      email: "carlos@email.com",
-      telefono: "51987654321",
-      contacto: "WhatsApp",
-      estado: "Registrado",
-      fecha_registro: new Date().toLocaleString("es-PE"),
-      nro_documento: "12345678",
-      foto_url: "",
-      fecha_llegada: new Date().toISOString().split("T")[0],
-      aerolinea: "LATAM Airlines",
-      nro_vuelo: "LA2010",
-      hora_estimada: "14:30",
-      tours: "machu_picchu, valle_sagrado",
-      notas: "Celebración de aniversario. Solicitan habitación alta con vista.",
-      acompanantes: [{ nombre:"Laura Mendoza", tipo:"adulto", tipdoc:"DNI", nrodoc:"87654321" }]
-    };
-  } else {
-    try {
-      const resp = await fetch(SCRIPT_URL + "?action=obtener_reservas");
-      const data = await resp.json();
-      if (data.ok) {
-        reserva = data.reservas.find(r => r.id_reserva === idReserva);
+  window[callbackName] = function(data) {
+    delete window[callbackName];
+    document.body.removeChild(script);
+    if (data && data.ok && data.reservas) {
+      const reserva = data.reservas.find(r => r.id_reserva === idReserva);
+      if (reserva) {
+        renderDetalle(reserva);
+      } else {
+        document.getElementById("main-content").innerHTML = `
+          <div style="text-align:center;padding:60px;">
+            <p style="color:#7f7663;font-size:16px;">Reserva <strong>${idReserva}</strong> no encontrada.</p>
+            <a href="${sheet_url}" target="_blank" style="color:var(--primary);font-size:14px;">Ver en Google Sheets</a>
+          </div>`;
       }
-    } catch(e) {}
-  }
+    }
+  };
 
-  if (!reserva) {
-    document.getElementById("main-content").innerHTML = `
-      <div style="text-align:center;padding:60px;">
-        <span class="ms" style="font-size:48px;color:#d4c472;">search_off</span>
-        <p style="margin-top:16px;color:#7f7663;">Reserva <strong>${idReserva}</strong> no encontrada.</p>
-        <a href="admin_panel.html" style="color:var(--primary);text-decoration:underline;font-size:14px;">Volver al panel</a>
-      </div>`;
-    return;
-  }
+  script.onerror = function() {
+    delete window[callbackName];
+    document.body.removeChild(script);
+    document.getElementById("main-content").innerHTML =
+      '<p style="text-align:center;padding:40px;color:#ba1a1a;">Error de conexión. <a href="https://docs.google.com/spreadsheets/d/1djP66x0YJu9FmSyJwYS-iEnihe8lqpTapAFiEGbSRzo/edit" target="_blank" style="color:var(--primary)">Ver en Google Sheets</a></p>';
+  };
 
-  renderDetalle(reserva);
+  script.src = SCRIPT_URL + "?action=obtener_reservas&callback=" + callbackName + "&t=" + Date.now();
+  document.body.appendChild(script);
 }
 
 function renderDetalle(r) {
@@ -261,11 +245,7 @@ function renderDetalle(r) {
 async function cambiarEstado(idR, estado) {
   const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
   if (!modoDemo) {
-    await fetch(SCRIPT_URL, {
-      method:"POST",
-      body:JSON.stringify({ action:"actualizar_estado", id_reserva:idR, estado }),
-      headers:{"Content-Type":"text/plain"}
-    });
+    await fetch(SCRIPT_URL, { method:"POST", body:JSON.stringify({ action:"actualizar_estado", id_reserva:idR, estado }), headers:{"Content-Type":"text/plain"}, mode:"no-cors" });
   }
   mostrarToast("Estado actualizado: " + estado);
 }
