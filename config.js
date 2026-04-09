@@ -7,7 +7,7 @@
 
 const QUENAS_CONFIG = {
   // URL del Google Apps Script (la obtienes al implementar)
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycby7TxseZFHEUtUdQ9k_q-zx9rtgsF1VeqRSnZHxFfviU_XE1la7OMe_GWBGDatxSS7ZCA/exec",
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyb3adQ8uDkIAO_eL-0GohR66dc86KtkX1rj4N0wWHGS1Q_TdE2Us_d2IQ4R-bSzWq93Q/exec",
 
   // Nombre del hotel
   HOTEL: "Hotel Las Quenas",
