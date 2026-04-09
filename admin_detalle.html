@@ -9,9 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --primary:#755b00; --primary-c:#c9a227; --surface:#fff8f5;
-    --on-surface:#2f1500; --secondary:#865225; --container:#ffeadc;
-    --container-low:#fff1e9; --outline:#d1c5af; --error:#ba1a1a;
+    --primary:#b8860b; --primary-c:#d4a017; --surface:#fefcf5;
+    --on-surface:#1a1200; --secondary:#8b6914; --container:#fdf3dc;
+    --container-low:#fefaf0; --outline:#d4c472; --error:#ba1a1a;
   }
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:'Work Sans',sans-serif; background:#f5f0eb; color:var(--on-surface); min-height:100vh; }
@@ -55,7 +55,7 @@
   <a href="admin_panel.html" style="color:rgba(255,255,255,.7);display:flex;align-items:center;text-decoration:none;gap:4px;font-size:14px;">
     <span class="ms">arrow_back</span> Panel
   </a>
-  <div style="flex:1;text-align:center;font-family:'Noto Serif',serif;font-size:16px;color:#c9a227;font-weight:700;">Las Quenas · Admin</div>
+  <div style="flex:1;text-align:center;font-family:'Noto Serif',serif;font-size:16px;color:#d4a017;font-weight:700;">Las Quenas · Admin</div>
   <div style="width:60px;"></div>
 </div>
 
@@ -117,7 +117,7 @@ async function cargar() {
   if (!reserva) {
     document.getElementById("main-content").innerHTML = `
       <div style="text-align:center;padding:60px;">
-        <span class="ms" style="font-size:48px;color:#d1c5af;">search_off</span>
+        <span class="ms" style="font-size:48px;color:#d4c472;">search_off</span>
         <p style="margin-top:16px;color:#7f7663;">Reserva <strong>${idReserva}</strong> no encontrada.</p>
         <a href="admin_panel.html" style="color:var(--primary);text-decoration:underline;font-size:14px;">Volver al panel</a>
       </div>`;
@@ -228,7 +228,7 @@ function renderDetalle(r) {
         ` : `
           <div class="foto-container">
             <div class="foto-placeholder">
-              <span class="ms" style="font-size:36px;color:#d1c5af;">image_not_supported</span>
+              <span class="ms" style="font-size:36px;color:#d4c472;">image_not_supported</span>
               <p style="margin-top:8px;font-size:13px;">Foto no subida aún</p>
             </div>
           </div>
@@ -273,7 +273,7 @@ async function cambiarEstado(idR, estado) {
 function mostrarToast(msg) {
   const t = document.createElement("div");
   t.textContent = msg;
-  t.style.cssText = "position:fixed;bottom:24px;right:24px;background:#755b00;color:white;padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;";
+  t.style.cssText = "position:fixed;bottom:24px;right:24px;background:#b8860b;color:white;padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;";
   document.body.appendChild(t);
   setTimeout(()=>t.remove(), 3000);
 }
