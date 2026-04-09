@@ -106,29 +106,59 @@
     <p style="color:#4d4635;font-size:14px;">Necesitamos estos datos para coordinar su bienvenida perfecta.</p>
   </div>
 
-  <!-- ── VUELO ── -->
+  <!-- ── TRANSPORTE ── -->
   <section style="background:var(--container-low);border-radius:16px;padding:24px;margin-bottom:24px;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-      <span class="ms" style="color:var(--primary);font-size:24px;">flight</span>
-      <h2 class="font-serif" style="font-size:18px;">Información de Vuelo</h2>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <span class="ms" style="color:var(--primary);font-size:24px;">commute</span>
+      <h2 class="font-serif" style="font-size:18px;">¿Cómo llegará a Cusco?</h2>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <label style="flex:1;min-width:100px;cursor:pointer;">
+        <input type="radio" name="medio" value="vuelo" checked onchange="cambiarMedio(this.value)" style="display:none;" id="r-vuelo"/>
+        <div class="medio-btn active" id="mb-vuelo" style="border:2px solid var(--primary);background:var(--container);border-radius:12px;padding:14px 10px;text-align:center;transition:all .2s;">
+          <span class="ms" style="font-size:28px;color:var(--primary);display:block;font-variation-settings:'FILL' 1;">flight</span>
+          <span style="font-size:13px;font-weight:600;color:var(--primary);">Vuelo</span>
+        </div>
+      </label>
+      <label style="flex:1;min-width:100px;cursor:pointer;">
+        <input type="radio" name="medio" value="bus" onchange="cambiarMedio(this.value)" style="display:none;" id="r-bus"/>
+        <div class="medio-btn" id="mb-bus" style="border:2px solid var(--outline);background:white;border-radius:12px;padding:14px 10px;text-align:center;transition:all .2s;">
+          <span class="ms" style="font-size:28px;color:#7f7663;display:block;font-variation-settings:'FILL' 1;">directions_bus</span>
+          <span style="font-size:13px;font-weight:600;color:#7f7663;">Bus / Empresa</span>
+        </div>
+      </label>
+      <label style="flex:1;min-width:100px;cursor:pointer;">
+        <input type="radio" name="medio" value="auto" onchange="cambiarMedio(this.value)" style="display:none;" id="r-auto"/>
+        <div class="medio-btn" id="mb-auto" style="border:2px solid var(--outline);background:white;border-radius:12px;padding:14px 10px;text-align:center;transition:all .2s;">
+          <span class="ms" style="font-size:28px;color:#7f7663;display:block;font-variation-settings:'FILL' 1;">directions_car</span>
+          <span style="font-size:13px;font-weight:600;color:#7f7663;">Auto propio</span>
+        </div>
+      </label>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
       <div style="grid-column:1/-1;">
         <label class="field-label">Fecha de Llegada *</label>
-        <input class="field-input" id="fecha-llegada" type="date" id="fecha-llegada"/>
+        <input class="field-input" id="fecha-llegada" type="date"/>
       </div>
-      <div>
-        <label class="field-label">Aerolínea *</label>
+      <div id="campo-empresa">
+        <label class="field-label" id="lbl-empresa">Aerolínea *</label>
         <input class="field-input" id="aerolinea" type="text" placeholder="Ej. LATAM, Avianca"/>
       </div>
-      <div>
+      <div id="campo-codigo">
         <label class="field-label">Número de Vuelo *</label>
         <input class="field-input" id="nro-vuelo" type="text" placeholder="Ej. LA2010" style="text-transform:uppercase;"/>
       </div>
       <div style="grid-column:1/-1;">
         <label class="field-label">Hora Estimada de Llegada *</label>
         <input class="field-input" id="hora-vuelo" type="time"/>
+      </div>
+      <div id="campo-auto-info" style="grid-column:1/-1;display:none;">
+        <div style="background:#e8f5e9;border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;">
+          <span class="ms" style="color:#2e7d32;font-variation-settings:'FILL' 1;">check_circle</span>
+          <span style="font-size:13px;color:#1b5e20;">Nuestro equipo estará listo para recibirle. No necesita código de transporte.</span>
+        </div>
       </div>
     </div>
   </section>
@@ -182,7 +212,62 @@
 </nav>
 
 <script>
+// Seguridad: forzar HTTPS
+if(location.protocol==='http:'&&location.hostname!=='localhost')location.replace(location.href.replace('http:','https:'));
+
 function getParam(k) { return new URLSearchParams(window.location.search).get(k); }
+
+let medioActual = 'vuelo';
+
+function cambiarMedio(medio) {
+  medioActual = medio;
+  // Estilo de botones
+  ['vuelo','bus','auto'].forEach(m => {
+    const mb = document.getElementById('mb-'+m);
+    if(mb) {
+      if(m === medio) {
+        mb.style.border = '2px solid var(--primary)';
+        mb.style.background = 'var(--container)';
+        mb.querySelectorAll('.ms').forEach(s=>s.style.color='var(--primary)');
+        mb.querySelectorAll('span:not(.ms)').forEach(s=>s.style.color='var(--primary)');
+      } else {
+        mb.style.border = '2px solid var(--outline)';
+        mb.style.background = 'white';
+        mb.querySelectorAll('.ms').forEach(s=>s.style.color='#7f7663');
+        mb.querySelectorAll('span:not(.ms)').forEach(s=>s.style.color='#7f7663');
+      }
+    }
+  });
+  // Mostrar/ocultar campos
+  const campoEmpresa = document.getElementById('campo-empresa');
+  const campoCodigo = document.getElementById('campo-codigo');
+  const campoAuto = document.getElementById('campo-auto-info');
+  const lblEmpresa = document.getElementById('lbl-empresa');
+  const inputEmpresa = document.getElementById('aerolinea');
+  const inputCodigo = document.getElementById('nro-vuelo');
+
+  if(medio === 'vuelo') {
+    campoEmpresa.style.display = 'block';
+    campoCodigo.style.display = 'block';
+    campoAuto.style.display = 'none';
+    lblEmpresa.textContent = 'Aerolínea *';
+    inputEmpresa.placeholder = 'Ej. LATAM, Avianca';
+    inputCodigo.style.display = 'block';
+  } else if(medio === 'bus') {
+    campoEmpresa.style.display = 'block';
+    campoCodigo.style.display = 'none';
+    campoAuto.style.display = 'none';
+    lblEmpresa.textContent = 'Empresa de Bus *';
+    inputEmpresa.placeholder = 'Ej. Cruz del Sur, Oltursa';
+    inputCodigo.value = '';
+  } else { // auto
+    campoEmpresa.style.display = 'none';
+    campoCodigo.style.display = 'none';
+    campoAuto.style.display = 'block';
+    inputEmpresa.value = 'Auto propio';
+    inputCodigo.value = 'N/A';
+  }
+}
 const idReserva = getParam("r") || "sin_reserva";
 
 // Actualizar links back
@@ -238,7 +323,12 @@ function continuar() {
   const hora = document.getElementById("hora-vuelo").value;
 
   let valido = true;
-  ["fecha-llegada","aerolinea","nro-vuelo","hora-vuelo"].forEach(id => {
+  const requiredFields = medioActual === 'auto'
+    ? ["fecha-llegada","hora-vuelo"]
+    : medioActual === 'bus'
+    ? ["fecha-llegada","aerolinea","hora-vuelo"]
+    : ["fecha-llegada","aerolinea","nro-vuelo","hora-vuelo"];
+  requiredFields.forEach(id => {
     const el = document.getElementById(id);
     if (!el.value.trim()) { el.classList.add("error"); valido = false; }
     else el.classList.remove("error");
@@ -249,7 +339,7 @@ function continuar() {
     return;
   }
 
-  const datosVuelo = {
+  const datosVuelo = { medio: medioActual,
     fecha_llegada: fecha,
     aerolinea: aerolinea,
     nro_vuelo: nroVuelo.toUpperCase(),
@@ -258,7 +348,7 @@ function continuar() {
     notas: document.getElementById("notas").value.trim()
   };
 
-  localStorage.setItem("quenas_" + idReserva + "_vuelo", JSON.stringify(datosVuelo));
+  sessionStorage.setItem("qn_" + idReserva + "_v", JSON.stringify({...datosVuelo, medio: medioActual}));
 
   const p = new URLSearchParams({ r: idReserva });
   if (getParam("n")) p.set("n", getParam("n"));

@@ -3,660 +3,325 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Registro de Huéspedes — Hotel Las Quenas</title>
+<title>Registro — Hotel Las Quenas</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="idiomas.js"></script>
+<script src="paises.js"></script>
 <style>
-  :root {
-    --primary: #755b00; --primary-c: #c9a227; --surface: #fff8f5;
-    --on-surface: #2f1500; --secondary: #865225; --container: #ffeadc;
-    --container-low: #fff1e9; --outline: #d1c5af; --error: #ba1a1a;
-  }
-  * { box-sizing: border-box; }
-  body { font-family: 'Work Sans', sans-serif; background: var(--surface); color: var(--on-surface); min-height: 100vh; margin: 0; }
-  .font-serif { font-family: 'Noto Serif', serif; }
-  .ms { font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; display: inline-block; line-height: 1; }
-
-  .field-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #4d4635; font-weight: 600; margin-bottom: 6px; display: block; }
-  .field-input {
-    width: 100%; padding: 14px 16px; background: white; border: 1.5px solid var(--outline);
-    border-radius: 10px; font-size: 15px; color: var(--on-surface); transition: border-color .2s;
-    font-family: 'Work Sans', sans-serif; outline: none;
-  }
-  .field-input:focus { border-color: var(--primary); }
-  .field-input.error { border-color: var(--error); }
-  select.field-input { cursor: pointer; }
-
-  .guest-card {
-    background: var(--container-low); border-radius: 16px; padding: 24px;
-    border-left: 4px solid var(--primary); margin-bottom: 16px;
-    animation: slideIn .3s ease;
-  }
-  .guest-card.secondary { border-left-color: var(--secondary); background: white; border: 1px solid var(--outline); border-left: 4px solid var(--secondary); }
-  @keyframes slideIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
-
-  .upload-zone {
-    border: 2px dashed var(--outline); border-radius: 12px; padding: 24px;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    cursor: pointer; transition: all .2s; background: white;
-    position: relative; overflow: hidden;
-  }
-  .upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: var(--container-low); }
-  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .upload-preview { width: 100%; border-radius: 8px; overflow: hidden; position: relative; }
-  .upload-preview img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 8px; }
-  .upload-badge {
-    position: absolute; bottom: 8px; right: 8px;
-    background: rgba(117,91,0,0.9); color: white; border-radius: 100px;
-    padding: 4px 10px; font-size: 11px; font-weight: 600;
-  }
-
-  .radio-group { display: flex; gap: 12px; flex-wrap: wrap; }
-  .radio-opt { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-  .radio-opt input { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
-  .radio-opt span { font-size: 14px; color: var(--on-surface); }
-
-  .btn-primary {
-    width: 100%; padding: 18px; background: linear-gradient(135deg, var(--primary), var(--primary-c));
-    color: white; border: none; border-radius: 14px; font-family: 'Work Sans', sans-serif;
-    font-size: 15px; font-weight: 600; letter-spacing: .06em; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: transform .15s, box-shadow .15s; box-shadow: 0 6px 20px rgba(117,91,0,0.25);
-  }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(117,91,0,0.3); }
-  .btn-primary:active { transform: scale(.98); }
-  .btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; }
-
-  .btn-add {
-    width: 100%; padding: 14px; border: 2px dashed var(--outline); border-radius: 12px;
-    background: transparent; color: var(--secondary); font-family: 'Work Sans', sans-serif;
-    font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center;
-    justify-content: center; gap: 8px; transition: all .2s;
-  }
-  .btn-add:hover { border-color: var(--primary); color: var(--primary); background: var(--container-low); }
-
-  .progress-bar {
-    display: flex; gap: 6px; align-items: center; justify-content: center; margin-bottom: 32px;
-  }
-  .progress-step {
-    width: 32px; height: 4px; border-radius: 2px; background: var(--outline); transition: background .3s;
-  }
-  .progress-step.done { background: var(--primary); }
-  .progress-step.active { background: var(--primary-c); }
-
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; width: 100%;
-    background: rgba(255,248,245,0.95); backdrop-filter: blur(16px);
-    border-top: 1px solid var(--outline); display: flex;
-    justify-content: space-around; padding: 10px 0 20px; z-index: 100;
-  }
-  .nav-item {
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
-    padding: 6px 12px; border-radius: 10px; text-decoration: none;
-    color: var(--secondary); font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
-    opacity: .7; transition: opacity .2s;
-  }
-  .nav-item.active { background: var(--container); color: var(--primary); opacity: 1; }
-
-  /* Spinner */
-  .spinner {
-    width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: white; border-radius: 50%;
-    animation: spin .7s linear infinite; display: none;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .avif-info {
-    background: var(--container); border-radius: 8px; padding: 10px 14px;
-    font-size: 12px; color: #4d4635; display: flex; align-items: center; gap: 8px;
-  }
+  :root{--primary:#755b00;--primary-c:#c9a227;--surface:#fff8f5;--on-surface:#2f1500;--secondary:#865225;--container:#ffeadc;--low:#fff1e9;--outline:#d1c5af;--error:#ba1a1a;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Work Sans',sans-serif;background:var(--surface);color:var(--on-surface);min-height:100vh;}
+  .serif{font-family:'Noto Serif',serif;}
+  .ms{font-family:'Material Symbols Outlined';font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;display:inline-block;line-height:1;}
+  .fl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#4d4635;font-weight:600;margin-bottom:6px;display:block;}
+  .fi{width:100%;padding:12px 14px;background:white;border:1.5px solid var(--outline);border-radius:10px;font-size:14px;color:var(--on-surface);transition:border-color .2s;font-family:'Work Sans',sans-serif;outline:none;}
+  .fi:focus{border-color:var(--primary);}
+  .fi.err{border-color:var(--error);}
+  .gc{background:var(--low);border-radius:16px;padding:20px;border-left:4px solid var(--primary);margin-bottom:14px;animation:si .3s ease;}
+  .gc.sec{border-left-color:var(--secondary);background:white;border:1px solid var(--outline);border-left:4px solid var(--secondary);}
+  @keyframes si{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .uz{border:2px dashed var(--outline);border-radius:10px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:all .2s;background:white;position:relative;overflow:hidden;text-align:center;min-height:100px;}
+  .uz:hover,.uz.ov{border-color:var(--primary);background:var(--low);}
+  .uz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+  .uz.ok{border-color:var(--primary);background:var(--low);padding:6px;}
+  .uz.ok img{width:100%;max-height:150px;object-fit:cover;border-radius:7px;}
+  .ubadge{display:inline-block;background:rgba(117,91,0,.9);color:white;border-radius:100px;padding:2px 9px;font-size:10px;font-weight:600;margin-top:3px;}
+  .rg{display:flex;gap:10px;flex-wrap:wrap;}
+  .ro{display:flex;align-items:center;gap:6px;cursor:pointer;}
+  .ro input{width:16px;height:16px;accent-color:var(--primary);cursor:pointer;}
+  .bp{width:100%;padding:16px;background:linear-gradient(135deg,var(--primary),var(--primary-c));color:white;border:none;border-radius:13px;font-family:'Work Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:.06em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 5px 18px rgba(117,91,0,.25);transition:transform .15s;}
+  .bp:active{transform:scale(.98);}
+  .ba{width:100%;padding:12px;border:2px dashed var(--outline);border-radius:11px;background:transparent;color:var(--secondary);font-family:'Work Sans',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;}
+  .ba:hover{border-color:var(--primary);color:var(--primary);}
+  .pg{display:flex;gap:5px;justify-content:center;margin-bottom:24px;}
+  .ps{width:30px;height:4px;border-radius:2px;background:var(--outline);}
+  .ps.d{background:var(--primary);}
+  .ps.a{background:var(--primary-c);}
+  .at{background:var(--container);border-radius:8px;padding:8px 12px;font-size:11px;color:#4d4635;display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+  .df{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .df.uno{grid-template-columns:1fr;}
+  /* Selector país */
+  .pw{position:relative;}
+  .pd{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1.5px solid var(--primary);border-radius:10px;z-index:300;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12);}
+  .pd.op{display:block;}
+  .pd>input{width:100%;padding:9px 13px;border:none;border-bottom:1px solid var(--outline);font-family:'Work Sans',sans-serif;font-size:13px;outline:none;}
+  .po{padding:9px 13px;font-size:13px;cursor:pointer;}
+  .po:hover{background:var(--low);}
+  .sb{display:inline-flex;align-items:center;gap:5px;background:#e8f5e9;border-radius:100px;padding:3px 11px;font-size:11px;color:#2e7d32;font-weight:600;}
+  .bn{position:fixed;bottom:0;left:0;width:100%;background:rgba(255,248,245,.95);backdrop-filter:blur(16px);border-top:1px solid var(--outline);display:flex;justify-content:space-around;padding:9px 0 18px;z-index:100;}
+  .ni{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 11px;border-radius:9px;text-decoration:none;color:var(--secondary);font-size:9px;text-transform:uppercase;letter-spacing:.06em;opacity:.7;}
+  .ni.act{background:var(--container);color:var(--primary);opacity:1;}
 </style>
 </head>
 <body>
-
-<!-- Header -->
-<header style="background:rgba(255,248,245,0.95); backdrop-filter:blur(16px); border-bottom:1px solid var(--outline); padding:16px 24px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:50;">
-  <a href="1_bienvenida.html" id="btn-back" style="color:var(--primary); background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:4px; text-decoration:none; font-size:14px;">
-    <span class="ms">arrow_back</span>
-  </a>
-  <div style="flex:1; text-align:center;">
-    <div class="font-serif" style="font-size:16px; color:var(--primary); font-weight:700;">Hotel Las Quenas</div>
-  </div>
+<header style="background:rgba(255,248,245,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--outline);padding:14px 20px;display:flex;align-items:center;position:sticky;top:0;z-index:50;">
+  <a href="1_bienvenida.html" id="btn-back" style="color:var(--primary);text-decoration:none;"><span class="ms">arrow_back</span></a>
+  <div style="flex:1;text-align:center;font-family:'Noto Serif',serif;font-size:16px;color:var(--primary);font-weight:700;">Hotel Las Quenas</div>
   <div style="width:28px;"></div>
 </header>
 
-<main style="max-width:640px; margin:0 auto; padding:24px 20px 140px;">
-
-  <!-- Progress -->
-  <div class="progress-bar">
-    <div class="progress-step done"></div>
-    <div class="progress-step active"></div>
-    <div class="progress-step"></div>
-    <div class="progress-step"></div>
-    <div class="progress-step"></div>
+<main style="max-width:620px;margin:0 auto;padding:20px 16px 130px;">
+  <div class="pg"><div class="ps d"></div><div class="ps a"></div><div class="ps"></div><div class="ps"></div><div class="ps"></div></div>
+  <div style="text-align:center;margin-bottom:18px;"><span class="sb"><span class="ms" style="font-size:13px;font-variation-settings:'FILL' 1;">lock</span> Información cifrada y protegida</span></div>
+  <div style="margin-bottom:20px;">
+    <h1 class="serif" style="font-size:22px;margin-bottom:5px;" data-i18n="registro_huespedes">Registro de Huéspedes</h1>
+    <p style="color:#4d4635;font-size:13px;" data-i18n="complete_datos">Complete los datos de todos los que le acompañan.</p>
   </div>
-
-  <div style="margin-bottom:28px;">
-    <h1 class="font-serif" style="font-size:26px; margin:0 0 8px;">Registro de Huéspedes</h1>
-    <p style="color:#4d4635; font-size:14px; margin:0;">Complete los datos de todos los que le acompañan.</p>
-  </div>
-
-  <!-- Contenedor de cards de huéspedes -->
-  <div id="guests-container"></div>
-
-  <!-- Botón agregar acompañante -->
-  <button class="btn-add" onclick="agregarHuesped()" id="btn-agregar" style="margin-bottom:24px;">
-    <span class="ms">person_add</span>
-    Añadir otro acompañante
+  <div id="gc"></div>
+  <button class="ba" onclick="agregarHuesped()" id="btn-ag" style="margin-bottom:18px;">
+    <span class="ms">person_add</span><span data-i18n="anadir_acompanante">Añadir otro acompañante</span>
   </button>
-
-  <!-- Continuar -->
-  <button class="btn-primary" onclick="continuar()" id="btn-continuar">
-    <div class="spinner" id="spinner"></div>
-    <span id="btn-texto">CONTINUAR</span>
-    <span class="ms" id="btn-icon">arrow_forward</span>
+  <button class="bp" onclick="continuar()">
+    <span data-i18n="continuar">CONTINUAR</span><span class="ms">arrow_forward</span>
   </button>
-
-  <p style="text-align:center; font-size:11px; color:#7f7663; margin-top:12px; text-transform:uppercase; letter-spacing:.06em;">Paso 2 de 5 · Registro de huéspedes</p>
-
+  <p style="text-align:center;font-size:10px;color:#7f7663;margin-top:9px;text-transform:uppercase;letter-spacing:.06em;" data-i18n="paso_registro">Paso 2 de 5</p>
 </main>
 
-<nav class="bottom-nav">
-  <a class="nav-item" href="1_bienvenida.html" id="nav-home"><span class="ms">home</span>Inicio</a>
-  <a class="nav-item active" href="#"><span class="ms">how_to_reg</span>Registro</a>
-  <a class="nav-item" href="#"><span class="ms">restaurant</span>Comedor</a>
-  <a class="nav-item" href="#"><span class="ms">explore</span>Tours</a>
+<nav class="bn">
+  <a class="ni" href="1_bienvenida.html" id="nav-home"><span class="ms">home</span>Inicio</a>
+  <a class="ni act" href="#"><span class="ms">how_to_reg</span>Registro</a>
+  <a class="ni" href="#"><span class="ms">restaurant</span>Comedor</a>
+  <a class="ni" href="#"><span class="ms">explore</span>Tours</a>
 </nav>
 
 <script>
-// ── Utils ──────────────────────────────────────────────────
-function getParam(k) { return new URLSearchParams(window.location.search).get(k); }
-const idReserva = getParam("r") || ("QNS-TMP-" + Date.now());
-const nombreParam = getParam("n") || "";
+if(location.protocol==="http:"&&location.hostname!=="localhost")location.replace(location.href.replace("http:","https:"));
 
-// Pasar parámetros al link back
-const backLink = document.getElementById("btn-back");
-if (getParam("r")) {
-  const p = new URLSearchParams({ r: getParam("r") });
-  if (getParam("n")) p.set("n", getParam("n"));
-  if (getParam("f")) p.set("f", getParam("f"));
-  backLink.href = "1_bienvenida.html?" + p.toString();
-}
+function gp(k){return new URLSearchParams(window.location.search).get(k);}
+const idR=gp("r")||("QNS-TMP-"+Date.now());
+const nomP=gp("n")||"";
+const bp=new URLSearchParams({r:idR});
+if(gp("n"))bp.set("n",gp("n"));if(gp("f"))bp.set("f",gp("f"));
+document.getElementById("btn-back").href="1_bienvenida.html?"+bp;
+document.getElementById("nav-home").href="1_bienvenida.html?"+bp;
 
-// ── Estado global ──────────────────────────────────────────
-let huespedes = []; // Array de objetos {campos, fotoDataUrl}
-let contadorHuespedes = 0;
+let hs=[], cnt=0, pA=null;
 
-// ── Crear card de huésped ──────────────────────────────────
-function crearCardHuesped(estitular = true, index = 0) {
-  const id = "h" + index;
-  const titulo = esTitular ? "Huésped Principal" : "Acompañante " + index;
-  const esAdulto = true;
-
-  const div = document.createElement("div");
-  div.className = "guest-card" + (esTitular ? "" : " secondary");
-  div.id = "card-" + id;
-  div.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span class="ms" style="color:var(--${esTitular ? "primary" : "secondary"}); font-size:22px; font-variation-settings:'FILL' 1;">${esTitular ? "person" : "person_add"}</span>
+function buildCard(esT,idx){
+  const id="h"+idx;
+  const d=document.createElement("div");
+  d.className="gc"+(esT?"":" sec");d.id="card-"+id;
+  d.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="ms" style="color:var(--${esT?'primary':'secondary'});font-size:20px;font-variation-settings:'FILL' 1;">${esT?'person':'person_add'}</span>
         <div>
-          <div class="font-serif" style="font-size:16px; font-weight:700;">${titulo}</div>
-          ${esTitular ? '<div style="font-size:11px; color:#7f7663; text-transform:uppercase; letter-spacing:.06em;">Titular de la reserva</div>' : ''}
+          <div class="serif" style="font-size:14px;font-weight:700;">${esT?t('huesped_principal'):(t('acompanante')||'Acompañante')+' '+idx}</div>
+          ${esT?`<div style="font-size:10px;color:#7f7663;text-transform:uppercase;letter-spacing:.06em;">${t('titular_reserva')}</div>`:''}
         </div>
       </div>
-      ${!esTitular ? `<button onclick="eliminarHuesped('${id}')" style="background:none; border:none; cursor:pointer; color:var(--error); padding:6px; border-radius:8px;"><span class="ms">delete_outline</span></button>` : ""}
+      ${!esT?`<button onclick="elim('${id}')" style="background:none;border:none;cursor:pointer;color:var(--error);"><span class="ms">delete_outline</span></button>`:''}
     </div>
-
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-
-      <!-- Nombre -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div style="grid-column:1/-1;">
-        <label class="field-label">Nombre Completo *</label>
-        <input class="field-input" id="${id}-nombre" type="text" placeholder="Ej. Juan Pérez"
-          value="${esTitular && nombreParam ? nombreParam : ""}"
-          oninput="guardarCampo('${id}','nombre',this.value)"/>
+        <label class="fl">${t('nombre_completo')} *</label>
+        <input class="fi" id="${id}-nom" type="text" value="${esT&&nomP?nomP:''}" oninput="gs('${id}','nombre',this.value)"/>
       </div>
-
-      <!-- Email (solo titular) -->
-      ${esTitular ? `
+      ${esT?`
+      <div style="grid-column:1/-1;"><label class="fl">${t('email')} *</label>
+        <input class="fi" id="${id}-email" type="email" placeholder="correo@ejemplo.com" oninput="gs('${id}','email',this.value)"/></div>
       <div style="grid-column:1/-1;">
-        <label class="field-label">Email *</label>
-        <input class="field-input" id="${id}-email" type="email" placeholder="correo@ejemplo.com"
-          oninput="guardarCampo('${id}','email',this.value)"/>
-      </div>` : ""}
-
-      <!-- Tipo (acompañante) -->
-      ${!esTitular ? `
-      <div style="grid-column:1/-1;">
-        <label class="field-label">Tipo de Huésped</label>
-        <div class="radio-group">
-          <label class="radio-opt">
-            <input type="radio" name="${id}-tipo" value="adulto" checked onchange="guardarCampo('${id}','tipo',this.value)"/>
-            <span>Adulto</span>
-          </label>
-          <label class="radio-opt">
-            <input type="radio" name="${id}-tipo" value="nino" onchange="guardarCampo('${id}','tipo',this.value)"/>
-            <span>Niño</span>
-          </label>
-        </div>
-      </div>` : ""}
-
-      <!-- Teléfono (solo titular) -->
-      ${esTitular ? `
-      <div>
-        <label class="field-label">País</label>
-        <select class="field-input" id="${id}-codigo" onchange="guardarCampo('${id}','codigo',this.value)">
-          <option value="51">PE +51</option>
-          <option value="54">AR +54</option>
-          <option value="56">CL +56</option>
-          <option value="57">CO +57</option>
-          <option value="1">US +1</option>
-          <option value="44">UK +44</option>
-          <option value="34">ES +34</option>
-          <option value="49">DE +49</option>
-          <option value="55">BR +55</option>
-        </select>
-      </div>
-      <div>
-        <label class="field-label">Teléfono *</label>
-        <input class="field-input" id="${id}-telefono" type="tel" placeholder="987 341 632"
-          oninput="guardarCampo('${id}','telefono',this.value)"/>
-      </div>` : ""}
-
-      <!-- Canal contacto (solo titular) -->
-      ${esTitular ? `
-      <div style="grid-column:1/-1;">
-        <label class="field-label">Contacto Preferido</label>
-        <div class="radio-group">
-          <label class="radio-opt">
-            <input type="radio" name="${id}-canal" value="WhatsApp" checked onchange="guardarCampo('${id}','canal',this.value)"/>
-            <span>WhatsApp</span>
-          </label>
-          <label class="radio-opt">
-            <input type="radio" name="${id}-canal" value="WeChat" onchange="guardarCampo('${id}','canal',this.value)"/>
-            <span>WeChat</span>
-          </label>
-          <label class="radio-opt">
-            <input type="radio" name="${id}-canal" value="Llamada" onchange="guardarCampo('${id}','canal',this.value)"/>
-            <span>Llamada</span>
-          </label>
-        </div>
-      </div>` : ""}
-
-      <!-- Nro Documento -->
-      <div style="grid-column:1/-1;">
-        <label class="field-label">Tipo de Documento</label>
-        <div class="radio-group" style="margin-bottom:10px;">
-          <label class="radio-opt">
-            <input type="radio" name="${id}-tipdoc" value="DNI" checked onchange="guardarCampo('${id}','tipdoc',this.value)"/>
-            <span>DNI</span>
-          </label>
-          <label class="radio-opt">
-            <input type="radio" name="${id}-tipdoc" value="Pasaporte" onchange="guardarCampo('${id}','tipdoc',this.value)"/>
-            <span>Pasaporte</span>
-          </label>
-          <label class="radio-opt">
-            <input type="radio" name="${id}-tipdoc" value="Cédula" onchange="guardarCampo('${id}','tipdoc',this.value)"/>
-            <span>Cédula</span>
-          </label>
-        </div>
-        <input class="field-input" id="${id}-nrodoc" type="text" placeholder="Número de documento"
-          oninput="guardarCampo('${id}','nrodoc',this.value)"/>
-      </div>
-
-      <!-- Upload foto documento -->
-      <div style="grid-column:1/-1;">
-        <label class="field-label">Foto del Documento *</label>
-        <div class="avif-info" style="margin-bottom:10px;">
-          <span class="ms" style="color:var(--primary); font-size:18px;">photo_camera</span>
-          <span>La imagen se optimizará automáticamente en formato AVIF para ahorrar espacio.</span>
-        </div>
-        <div class="upload-zone" id="zone-${id}" ondragover="dragOver(event,'${id}')" ondragleave="dragLeave('${id}')" ondrop="dropFile(event,'${id}')">
-          <input type="file" accept="image/*" capture="environment" onchange="procesarFoto(this,'${id}')"/>
-          <div id="upload-content-${id}">
-            <span class="ms" style="font-size:36px; color:var(--outline);">add_a_photo</span>
-            <p style="font-size:13px; color:#7f7663; text-align:center; margin:4px 0 0;">Toca para fotografiar o cargar<br/><strong>DNI, Pasaporte o Cédula</strong></p>
+        <label class="fl">${t('pais')} *</label>
+        <div class="pw" id="pw-${id}">
+          <div class="fi" id="ps-${id}" onclick="tgP('${id}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            <span id="pv-${id}">Perú (+51)</span><span class="ms" style="font-size:16px;color:var(--outline);">expand_more</span>
+          </div>
+          <div class="pd" id="pd-${id}">
+            <input type="text" placeholder="🔍 Buscar..." oninput="fP('${id}',this.value)" onclick="event.stopPropagation()"/>
+            <div id="pl-${id}"></div>
           </div>
         </div>
-        <div id="foto-status-${id}" style="font-size:12px; color:var(--primary); margin-top:6px; display:none;"></div>
+        <input type="hidden" id="${id}-cod" value="+51"/>
       </div>
-
-    </div>
-  `;
-
-  return div;
-}
-
-// Workaround para closure del template literal
-let esTemporalTitular = true;
-function crearCard(esT, idx) {
-  esTemporalTitular = esT;
-  return crearCardHuesped(esT, idx);
-}
-// Alias limpio
-function crearCardHuesped(esT, idx) {
-  const id = "h" + idx;
-  const titulo = esT ? "Huésped Principal" : ("Acompañante " + idx);
-  const div = document.createElement("div");
-  div.className = "guest-card" + (esT ? "" : " secondary");
-  div.id = "card-" + id;
-  div.dataset.index = idx;
-  div.dataset.titular = esT ? "1" : "0";
-
-  div.innerHTML = buildCardHTML(id, esT, titulo, idx);
-  return div;
-}
-
-function buildCardHTML(id, esT, titulo, idx) {
-  return `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span class="ms" style="color:var(--${esT ? 'primary' : 'secondary'});font-size:22px;font-variation-settings:'FILL' 1;">${esT ? 'person' : 'person_add'}</span>
-        <div>
-          <div class="font-serif" style="font-size:16px;font-weight:700;">${titulo}</div>
-          ${esT ? '<div style="font-size:11px;color:#7f7663;text-transform:uppercase;letter-spacing:.06em;">Titular de la reserva</div>' : ''}
+      <div style="grid-column:1/-1;"><label class="fl">${t('telefono')} *</label>
+        <input class="fi" id="${id}-tel" type="tel" placeholder="987 341 632" oninput="gs('${id}','telefono',this.value)"/></div>
+      <div style="grid-column:1/-1;">
+        <label class="fl">${t('contacto_preferido')}</label>
+        <div class="rg">
+          <label class="ro"><input type="radio" name="${id}-canal" value="WhatsApp" checked onchange="gs('${id}','canal',this.value)"/><span>${t('whatsapp')}</span></label>
+          <label class="ro"><input type="radio" name="${id}-canal" value="WeChat" onchange="gs('${id}','canal',this.value)"/><span>${t('wechat')}</span></label>
+          <label class="ro"><input type="radio" name="${id}-canal" value="Llamada" onchange="gs('${id}','canal',this.value)"/><span>${t('llamada')}</span></label>
         </div>
-      </div>
-      ${!esT ? `<button onclick="eliminarHuesped('${id}')" style="background:none;border:none;cursor:pointer;color:var(--error);padding:6px;border-radius:8px;"><span class="ms">delete_outline</span></button>` : ''}
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div style="grid-column:1/-1;">
-        <label class="field-label">Nombre Completo *</label>
-        <input class="field-input" id="${id}-nombre" type="text" placeholder="Ej. Juan Pérez"
-          value="${esT && nombreParam ? nombreParam : ''}" oninput="guardarCampo('${id}','nombre',this.value)"/>
-      </div>
-
-      ${esT ? `
-      <div style="grid-column:1/-1;">
-        <label class="field-label">Email *</label>
-        <input class="field-input" id="${id}-email" type="email" placeholder="correo@ejemplo.com" oninput="guardarCampo('${id}','email',this.value)"/>
-      </div>
-      <div>
-        <label class="field-label">País</label>
-        <select class="field-input" id="${id}-codigo" onchange="guardarCampo('${id}','codigo',this.value)">
-          <option value="51">PE +51</option><option value="54">AR +54</option>
-          <option value="56">CL +56</option><option value="57">CO +57</option>
-          <option value="1">US +1</option><option value="44">UK +44</option>
-          <option value="34">ES +34</option><option value="49">DE +49</option>
-          <option value="55">BR +55</option>
-        </select>
-      </div>
-      <div>
-        <label class="field-label">Teléfono *</label>
-        <input class="field-input" id="${id}-telefono" type="tel" placeholder="987 341 632" oninput="guardarCampo('${id}','telefono',this.value)"/>
-      </div>
-      <div style="grid-column:1/-1;">
-        <label class="field-label">Contacto Preferido</label>
-        <div class="radio-group">
-          <label class="radio-opt"><input type="radio" name="${id}-canal" value="WhatsApp" checked onchange="guardarCampo('${id}','canal',this.value)"/><span>WhatsApp</span></label>
-          <label class="radio-opt"><input type="radio" name="${id}-canal" value="WeChat" onchange="guardarCampo('${id}','canal',this.value)"/><span>WeChat</span></label>
-          <label class="radio-opt"><input type="radio" name="${id}-canal" value="Llamada" onchange="guardarCampo('${id}','canal',this.value)"/><span>Llamada</span></label>
-        </div>
-      </div>` : `
-      <div style="grid-column:1/-1;">
-        <label class="field-label">Tipo de Huésped</label>
-        <div class="radio-group">
-          <label class="radio-opt"><input type="radio" name="${id}-tipo" value="adulto" checked onchange="guardarCampo('${id}','tipo',this.value)"/><span>Adulto</span></label>
-          <label class="radio-opt"><input type="radio" name="${id}-tipo" value="nino" onchange="guardarCampo('${id}','tipo',this.value)"/><span>Niño</span></label>
+      </div>`:`
+      <div style="grid-column:1/-1;"><label class="fl">Tipo</label>
+        <div class="rg">
+          <label class="ro"><input type="radio" name="${id}-tipo" value="adulto" checked onchange="gs('${id}','tipo',this.value)"/><span>${t('adulto')}</span></label>
+          <label class="ro"><input type="radio" name="${id}-tipo" value="nino" onchange="gs('${id}','tipo',this.value)"/><span>${t('nino')}</span></label>
         </div>
       </div>`}
-
       <div style="grid-column:1/-1;">
-        <label class="field-label">Tipo de Documento</label>
-        <div class="radio-group" style="margin-bottom:10px;">
-          <label class="radio-opt"><input type="radio" name="${id}-tipdoc" value="DNI" checked onchange="guardarCampo('${id}','tipdoc',this.value)"/><span>DNI</span></label>
-          <label class="radio-opt"><input type="radio" name="${id}-tipdoc" value="Pasaporte" onchange="guardarCampo('${id}','tipdoc',this.value)"/><span>Pasaporte</span></label>
-          <label class="radio-opt"><input type="radio" name="${id}-tipdoc" value="Cédula" onchange="guardarCampo('${id}','tipdoc',this.value)"/><span>Cédula</span></label>
+        <label class="fl">${t('tipo_documento')}</label>
+        <div class="rg" style="margin-bottom:9px;">
+          <label class="ro"><input type="radio" name="${id}-td" value="DNI" checked onchange="ctd('${id}',this.value)"/><span>DNI</span></label>
+          <label class="ro"><input type="radio" name="${id}-td" value="Pasaporte" onchange="ctd('${id}',this.value)"/><span>Pasaporte</span></label>
+          <label class="ro"><input type="radio" name="${id}-td" value="Cedula" onchange="ctd('${id}',this.value)"/><span>Cédula</span></label>
         </div>
-        <input class="field-input" id="${id}-nrodoc" type="text" placeholder="Número de documento" oninput="guardarCampo('${id}','nrodoc',this.value)"/>
+        <input class="fi" id="${id}-nrd" type="text" placeholder="${t('nro_documento')}" oninput="gs('${id}','nrodoc',this.value)"/>
       </div>
+      <div style="grid-column:1/-1;" id="fc-${id}"></div>
+    </div>`;
+  return d;
+}
 
-      <div style="grid-column:1/-1;">
-        <label class="field-label">Foto del Documento *</label>
-        <div class="avif-info" style="margin-bottom:10px;">
-          <span class="ms" style="color:var(--primary);font-size:18px;">photo_camera</span>
-          <span>La imagen se optimizará a formato AVIF automáticamente (~150KB máx).</span>
-        </div>
-        <div class="upload-zone" id="zone-${id}" ondragover="dragOver(event,'${id}')" ondragleave="dragLeave('${id}')" ondrop="dropFile(event,'${id}')">
-          <input type="file" accept="image/*" capture="environment" onchange="procesarFoto(this,'${id}')"/>
-          <div id="upload-content-${id}">
-            <span class="ms" style="font-size:36px;color:var(--outline);">add_a_photo</span>
-            <p style="font-size:13px;color:#7f7663;text-align:center;margin:4px 0 0;">Toca para fotografiar o cargar<br/><strong>DNI · Pasaporte · Cédula</strong></p>
-          </div>
-        </div>
-        <div id="foto-status-${id}" style="font-size:12px;color:var(--primary);margin-top:6px;display:none;"></div>
+function ctd(id,tipo){
+  gs(id,'tipdoc',tipo);
+  const el=document.getElementById("fc-"+id);
+  const esPas=tipo==="Pasaporte";
+  el.innerHTML=`
+    <div class="at"><span class="ms" style="color:var(--primary);font-size:16px;font-variation-settings:'FILL' 1;">lock</span>${t('optimizada_avif')}</div>
+    <div class="df ${esPas?'uno':''}">
+      ${!esPas?zf(id,0,t('foto_anverso')):''}
+      ${!esPas?zf(id,1,t('foto_reverso')):zf(id,0,t('foto_pasaporte'))}
+    </div>`;
+  el.querySelectorAll("input[type=file]").forEach(inp=>{
+    const fi=parseInt(inp.dataset.idx);
+    inp.onchange=()=>{if(inp.files[0])pF(inp.files[0],id,fi);};
+  });
+  el.querySelectorAll(".uz").forEach(z=>{
+    z.ondragover=e=>{e.preventDefault();z.classList.add("ov");};
+    z.ondragleave=()=>z.classList.remove("ov");
+    z.ondrop=e=>{e.preventDefault();z.classList.remove("ov");const fi=parseInt(z.dataset.idx);if(e.dataTransfer.files[0])pF(e.dataTransfer.files[0],id,fi);};
+  });
+}
+
+function zf(id,idx,lbl){
+  return `<div>
+    <label class="fl">${lbl}</label>
+    <div class="uz" id="z-${id}-${idx}" data-idx="${idx}">
+      <input type="file" accept="image/*" capture="environment" data-idx="${idx}"/>
+      <div id="zc-${id}-${idx}">
+        <span class="ms" style="font-size:30px;color:var(--outline);">add_a_photo</span>
+        <p style="font-size:11px;color:#7f7663;margin-top:3px;">${t('toca_fotografiar')}</p>
       </div>
     </div>
-  `;
+    <div id="zs-${id}-${idx}" style="font-size:11px;color:var(--primary);margin-top:4px;display:none;"></div>
+  </div>`;
 }
 
-// ── Inicializar ────────────────────────────────────────────
-function init() {
-  contadorHuespedes = 0;
-  const container = document.getElementById("guests-container");
-  container.innerHTML = "";
-  const card = crearCardHuesped(true, contadorHuespedes++);
-  container.appendChild(card);
-  huespedes = [{ id: "h0", datos: {}, foto: null }];
+async function pF(file,hId,fi){
+  const ss=document.getElementById(`zs-${hId}-${fi}`);
+  const cc=document.getElementById(`zc-${hId}-${fi}`);
+  const zz=document.getElementById(`z-${hId}-${fi}`);
+  ss.textContent="⏳ Optimizando...";ss.style.display="block";ss.style.color="#4d4635";
+  try{
+    const r=await avif(file);
+    cc.innerHTML=`<img src="${r.d}" alt="doc"/><div class="ubadge">✓ AVIF ${r.kb}KB</div>`;
+    zz.classList.add("ok");
+    ss.textContent=`✅ ${r.ok}KB → ${r.kb}KB (-${r.a}%)`;ss.style.color="var(--primary)";
+    const h=hs.find(h=>h.id===hId);
+    if(h){if(!h.fotos)h.fotos=[];h.fotos[fi]=r.d;}
+  }catch(e){ss.textContent="❌ Error. Intenta con otra foto.";ss.style.color="var(--error)";}
 }
 
-function agregarHuesped() {
-  const container = document.getElementById("guests-container");
-  const idx = contadorHuespedes++;
-  const card = crearCardHuesped(false, idx);
-  container.appendChild(card);
-  huespedes.push({ id: "h" + idx, datos: {}, foto: null });
-  card.scrollIntoView({ behavior: "smooth", block: "start" });
-
-  if (contadorHuespedes >= 6) {
-    document.getElementById("btn-agregar").style.display = "none";
-  }
-}
-
-function eliminarHuesped(id) {
-  const card = document.getElementById("card-" + id);
-  if (card) {
-    card.style.animation = "slideIn .3s ease reverse";
-    setTimeout(() => card.remove(), 280);
-  }
-  huespedes = huespedes.filter(h => h.id !== id);
-  if (contadorHuespedes < 6) {
-    document.getElementById("btn-agregar").style.display = "flex";
-  }
-}
-
-// ── Guardar campo ──────────────────────────────────────────
-function guardarCampo(hId, campo, valor) {
-  const h = huespedes.find(h => h.id === hId);
-  if (h) h.datos[campo] = valor;
-}
-
-// ── Drag & Drop ────────────────────────────────────────────
-function dragOver(e, id) { e.preventDefault(); document.getElementById("zone-" + id).classList.add("dragover"); }
-function dragLeave(id) { document.getElementById("zone-" + id).classList.remove("dragover"); }
-function dropFile(e, id) {
-  e.preventDefault();
-  dragLeave(id);
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith("image/")) procesarFotoArchivo(file, id);
-}
-
-// ── Procesar foto y convertir a AVIF ──────────────────────
-function procesarFoto(input, id) {
-  if (input.files[0]) procesarFotoArchivo(input.files[0], id);
-}
-
-async function procesarFotoArchivo(file, hId) {
-  const statusEl = document.getElementById("foto-status-" + hId);
-  const contentEl = document.getElementById("upload-content-" + hId);
-  const zone = document.getElementById("zone-" + hId);
-
-  statusEl.textContent = "⏳ Optimizando imagen...";
-  statusEl.style.display = "block";
-  statusEl.style.color = "#4d4635";
-
-  try {
-    const result = await convertirImagenAvif(file);
-
-    // Vista previa
-    contentEl.innerHTML = `
-      <div class="upload-preview">
-        <img src="${result.dataUrl}" alt="Documento"/>
-        <div class="upload-badge">✓ AVIF ${result.kb}KB</div>
-      </div>
-    `;
-    zone.style.border = "2px solid var(--primary)";
-    zone.style.padding = "8px";
-
-    statusEl.textContent = `✅ Imagen optimizada: ${result.originalKb}KB → ${result.kb}KB (${result.ahorro}% más pequeña)`;
-    statusEl.style.color = "var(--primary)";
-
-    // Guardar en el estado
-    const h = huespedes.find(h => h.id === hId);
-    if (h) h.foto = result.dataUrl;
-
-  } catch (err) {
-    statusEl.textContent = "❌ Error al procesar la imagen. Intenta con otra foto.";
-    statusEl.style.color = "var(--error)";
-  }
-}
-
-// ── Conversión a AVIF/WebP en el navegador ────────────────
-async function convertirImagenAvif(file, maxKB = 150) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const originalKb = Math.round(file.size / 1024);
-    const url = URL.createObjectURL(file);
-
-    img.onload = () => {
-      // Reducir resolución si es grande
-      let w = img.width, h = img.height;
-      const MAX = 1400;
-      if (w > MAX || h > MAX) {
-        const r = Math.min(MAX / w, MAX / h);
-        w = Math.round(w * r); h = Math.round(h * r);
-      }
-
-      const canvas = document.createElement("canvas");
-      canvas.width = w; canvas.height = h;
-      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-      URL.revokeObjectURL(url);
-
-      // Detectar soporte AVIF
-      const testCanvas = document.createElement("canvas");
-      testCanvas.width = 1; testCanvas.height = 1;
-      const supAvif = testCanvas.toDataURL("image/avif").startsWith("data:image/avif");
-      const fmt = supAvif ? "image/avif" : "image/webp";
-
-      // Calidad adaptativa
-      let q = 0.82;
-      let dataUrl = canvas.toDataURL(fmt, q);
-
-      while ((dataUrl.length * 0.75) > maxKB * 1024 && q > 0.3) {
-        q -= 0.08;
-        dataUrl = canvas.toDataURL(fmt, q);
-      }
-
-      const kb = Math.round(dataUrl.length * 0.75 / 1024);
-      const ahorro = originalKb > 0 ? Math.round((1 - kb / originalKb) * 100) : 0;
-      resolve({ dataUrl, kb, originalKb, ahorro, formato: fmt });
+async function avif(file,mx=150){
+  return new Promise((res,rej)=>{
+    const img=new Image(),ok=Math.round(file.size/1024);
+    img.onload=()=>{
+      let w=img.width,h=img.height,M=1400;
+      if(w>M||h>M){const r=Math.min(M/w,M/h);w=Math.round(w*r);h=Math.round(h*r);}
+      const c=document.createElement("canvas");c.width=w;c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);URL.revokeObjectURL(img.src);
+      const tc=document.createElement("canvas");tc.width=1;tc.height=1;
+      const fmt=tc.toDataURL("image/avif").startsWith("data:image/avif")?"image/avif":"image/webp";
+      let q=0.82,d=c.toDataURL(fmt,q);
+      while(d.length*.75>mx*1024&&q>0.3){q-=0.08;d=c.toDataURL(fmt,q);}
+      const kb=Math.round(d.length*.75/1024);
+      res({d,kb,ok,a:Math.round((1-kb/ok)*100)});
     };
-
-    img.onerror = reject;
-    img.src = url;
+    img.onerror=rej;img.src=URL.createObjectURL(file);
   });
 }
 
-// ── Validación ─────────────────────────────────────────────
-function validar() {
-  let valido = true;
-  huespedes.forEach((h, i) => {
-    const nombreEl = document.getElementById(h.id + "-nombre");
-    if (!nombreEl || !nombreEl.value.trim()) {
-      if (nombreEl) { nombreEl.classList.add("error"); nombreEl.focus(); }
-      valido = false;
-    } else {
-      if (nombreEl) nombreEl.classList.remove("error");
-    }
-
-    if (i === 0) {  // Titular: email y teléfono requeridos
-      const emailEl = document.getElementById(h.id + "-email");
-      const telEl = document.getElementById(h.id + "-telefono");
-      if (!emailEl?.value.includes("@")) {
-        if (emailEl) emailEl.classList.add("error");
-        valido = false;
-      } else { if (emailEl) emailEl.classList.remove("error"); }
-      if (!telEl?.value.trim()) {
-        if (telEl) telEl.classList.add("error");
-        valido = false;
-      } else { if (telEl) telEl.classList.remove("error"); }
-    }
-  });
-  return valido;
+// País
+function tgP(id){
+  const dd=document.getElementById("pd-"+id);
+  if(dd.classList.contains("op")){dd.classList.remove("op");pA=null;return;}
+  if(pA)document.getElementById("pd-"+pA)?.classList.remove("op");
+  pA=id;rP(id,"");dd.classList.add("op");dd.querySelector("input").focus();
 }
-
-// ── Continuar ──────────────────────────────────────────────
-async function continuar() {
-  if (!validar()) {
-    mostrarToast("Por favor completa los campos obligatorios (*).", "error");
-    return;
+function fP(id,q){rP(id,q);}
+function rP(id,q){
+  const lista=document.getElementById("pl-"+id);
+  const f=q?PAISES.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())||p.dial.includes(q)):PAISES;
+  lista.innerHTML=f.slice(0,80).map(p=>`<div class="po" onclick="sP('${id}','${p.dial}','${p.name}','${p.code}')">${p.name} <span style="color:#7f7663;font-size:11px;">${p.dial}</span></div>`).join("");
+}
+function sP(id,dial,name,code){
+  document.getElementById(`${id}-cod`).value=dial;
+  document.getElementById(`pv-${id}`).textContent=name+" ("+dial+")";
+  document.getElementById(`pd-${id}`).classList.remove("op");
+  gs(id,'codigo',dial);gs(id,'pais',code);pA=null;
+}
+document.addEventListener("click",e=>{
+  if(pA&&!document.getElementById("pw-"+pA)?.contains(e.target)){
+    document.getElementById("pd-"+pA)?.classList.remove("op");pA=null;
   }
+});
 
-  // Recopilar datos
-  const titular = huespedes[0];
-  const tId = titular.id;
+function gs(hId,c,v){const h=hs.find(h=>h.id===hId);if(h)h.datos[c]=v;}
+function elim(id){document.getElementById("card-"+id)?.remove();hs=hs.filter(h=>h.id!==id);if(cnt<6)document.getElementById("btn-ag").style.display="flex";}
 
-  const datos = {
-    id_reserva: idReserva,
-    nombre_titular: document.getElementById(tId + "-nombre")?.value.trim() || "",
-    email: document.getElementById(tId + "-email")?.value.trim() || "",
-    telefono: (document.getElementById(tId + "-codigo")?.value || "51") + (document.getElementById(tId + "-telefono")?.value.trim() || ""),
-    contacto_preferido: document.querySelector(`input[name="${tId}-canal"]:checked`)?.value || "WhatsApp",
-    nro_documento: document.getElementById(tId + "-nrodoc")?.value.trim() || "",
-    pais: document.getElementById(tId + "-codigo")?.value || "51",
-    acompanantes: huespedes.slice(1).map(h => ({
-      nombre: document.getElementById(h.id + "-nombre")?.value.trim() || "",
-      tipo: document.querySelector(`input[name="${h.id}-tipo"]:checked`)?.value || "adulto",
-      tipdoc: document.querySelector(`input[name="${h.id}-tipdoc"]:checked`)?.value || "DNI",
-      nrodoc: document.getElementById(h.id + "-nrodoc")?.value.trim() || ""
-    })),
-    fotos: huespedes.map((h, i) => ({ indice: i, dataUrl: h.foto })).filter(f => f.dataUrl)
+function init(){
+  cnt=0;document.getElementById("gc").innerHTML="";
+  const c=buildCard(true,cnt++);document.getElementById("gc").appendChild(c);
+  hs=[{id:"h0",datos:{},fotos:[]}];ctd("h0","DNI");
+  const pd=detectarPaisPorIdioma();const pp=PAISES.find(p=>p.code===pd)||PAISES.find(p=>p.code==="PE");
+  sP("h0",pp.dial,pp.name,pp.code);
+}
+
+function agregarHuesped(){
+  const idx=cnt++;const id="h"+idx;
+  const c=buildCard(false,idx);document.getElementById("gc").appendChild(c);
+  hs.push({id,datos:{},fotos:[]});ctd(id,"DNI");
+  c.scrollIntoView({behavior:"smooth",block:"start"});
+  if(cnt>=6)document.getElementById("btn-ag").style.display="none";
+}
+
+function continuar(){
+  let ok=true;
+  hs.forEach((h,i)=>{
+    const n=document.getElementById(h.id+"-nom");
+    if(!n?.value.trim()){n?.classList.add("err");ok=false;}else n?.classList.remove("err");
+    if(i===0){
+      const e=document.getElementById(h.id+"-email");
+      const tl=document.getElementById(h.id+"-tel");
+      if(!e?.value.includes("@")){e?.classList.add("err");ok=false;}else e?.classList.remove("err");
+      if(!tl?.value.trim()){tl?.classList.add("err");ok=false;}else tl?.classList.remove("err");
+    }
+  });
+  if(!ok){toast("Por favor completa los campos marcados.","error");return;}
+
+  const h0=hs[0],t0=h0.id;
+  const datos={
+    id_reserva:idR,
+    nombre_titular:document.getElementById(t0+"-nom")?.value.trim()||"",
+    email:document.getElementById(t0+"-email")?.value.trim()||"",
+    telefono:(document.getElementById(t0+"-cod")?.value||"+51")+(document.getElementById(t0+"-tel")?.value.replace(/\D/g,"")||""),
+    contacto_preferido:document.querySelector(`input[name="${t0}-canal"]:checked`)?.value||"WhatsApp",
+    nro_documento:document.getElementById(t0+"-nrd")?.value.trim()||"",
+    tipdoc:document.querySelector(`input[name="${t0}-td"]:checked`)?.value||"DNI",
+    pais:document.getElementById(t0+"-cod")?.value||"+51",
+    idioma:IDIOMA,
+    acompanantes:hs.slice(1).map(h=>({nombre:document.getElementById(h.id+"-nom")?.value.trim()||"",tipo:document.querySelector(`input[name="${h.id}-tipo"]:checked`)?.value||"adulto",tipdoc:document.querySelector(`input[name="${h.id}-td"]:checked`)?.value||"DNI",nrodoc:document.getElementById(h.id+"-nrd")?.value.trim()||""})),
+    fotos:hs.map((h,i)=>({indice:i,fotos:h.fotos||[]}))
   };
 
-  // Guardar en localStorage para la siguiente página
-  localStorage.setItem("quenas_" + idReserva + "_huespedes", JSON.stringify(datos));
-
-  // Navegar a la siguiente página
-  const params = new URLSearchParams({ r: idReserva });
-  if (getParam("n")) params.set("n", getParam("n"));
-  if (getParam("f")) params.set("f", getParam("f"));
-  window.location.href = "3_detalles_viaje.html?" + params.toString();
+  // Seguridad: guardar en sessionStorage, NO en la URL
+  sessionStorage.setItem("qn_"+idR+"_h",JSON.stringify(datos));
+  const p=new URLSearchParams({r:idR});
+  if(gp("n"))p.set("n",gp("n"));if(gp("f"))p.set("f",gp("f"));
+  window.location.href="3_detalles_viaje.html?"+p;
 }
 
-// ── Toast ──────────────────────────────────────────────────
-function mostrarToast(msg, tipo = "ok") {
-  const t = document.createElement("div");
-  t.textContent = msg;
-  t.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
-    background:${tipo === "ok" ? "#755b00" : "#ba1a1a"};color:white;padding:12px 20px;
-    border-radius:100px;font-size:13px;z-index:9999;max-width:90%;text-align:center;
-    box-shadow:0 4px 16px rgba(0,0,0,0.2);`;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
+function toast(msg,tipo){
+  const el=document.createElement("div");el.textContent=msg;
+  el.style.cssText=`position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:${tipo==="error"?"#ba1a1a":"#755b00"};color:white;padding:11px 18px;border-radius:100px;font-size:13px;z-index:9999;max-width:90%;text-align:center;`;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),3500);
 }
 
-// ── Iniciar ────────────────────────────────────────────────
+aplicarIdioma();
 init();
-
-// Cargar datos guardados si existen
-const datosGuardados = localStorage.getItem("quenas_" + idReserva + "_huespedes");
-if (datosGuardados) {
-  // Ya existe un registro previo — no precargar para no confundir
-}
 </script>
-
 </body>
 </html>

@@ -223,6 +223,7 @@
 // Cambia esta URL por la que obtienes al implementar el Apps Script
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7TxseZFHEUtUdQ9k_q-zx9rtgsF1VeqRSnZHxFfviU_XE1la7OMe_GWBGDatxSS7ZCA/exec";
 
+if(location.protocol==="http:"&&location.hostname!=="localhost")location.replace(location.href.replace("http:","https:"));
 function getParam(k) { return new URLSearchParams(window.location.search).get(k); }
 const idReserva = getParam("r") || "sin_reserva";
 
@@ -236,8 +237,8 @@ document.getElementById("nav-home").href = "1_bienvenida.html?" + p.toString();
 function cargarResumen() {
   document.getElementById("codigo-display").textContent = idReserva;
 
-  const datosH = JSON.parse(localStorage.getItem("quenas_" + idReserva + "_huespedes") || "{}");
-  const datosV = JSON.parse(localStorage.getItem("quenas_" + idReserva + "_vuelo") || "{}");
+  const datosH = JSON.parse(sessionStorage.getItem("qn_" + idReserva + "_h") || "{}");
+  const datosV = JSON.parse(sessionStorage.getItem("qn_" + idReserva + "_v") || "{}");
 
   // Resumen huéspedes
   if (datosH.nombre_titular) {
@@ -261,7 +262,8 @@ function cargarResumen() {
     const fechaStr = fecha.toLocaleDateString("es-PE", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
     document.getElementById("resumen-vuelo").innerHTML = `
       <div class="resumen-row"><span class="resumen-label">Fecha</span><span class="resumen-value">${fechaStr}</span></div>
-      <div class="resumen-row"><span class="resumen-label">Aerolínea</span><span class="resumen-value">${datosV.aerolinea}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Medio</span><span class="resumen-value">${datosV.medio==="vuelo"?"✈️ Vuelo":datosV.medio==="bus"?"🚌 Bus":"🚗 Auto propio"}</span></div>
+      ${datosV.aerolinea&&datosV.aerolinea!=="Auto propio"?`<div class="resumen-row"><span class="resumen-label">Empresa</span><span class="resumen-value">${datosV.aerolinea}</span></div>`:""}
       <div class="resumen-row"><span class="resumen-label">Vuelo</span><span class="resumen-value">${datosV.nro_vuelo}</span></div>
       <div class="resumen-row"><span class="resumen-label">Hora estimada</span><span class="resumen-value">${datosV.hora_estimada}</span></div>
       ${datosV.notas ? `<div class="resumen-row"><span class="resumen-label">Notas</span><span class="resumen-value">${datosV.notas}</span></div>` : ""}
@@ -294,8 +296,8 @@ async function enviarRegistro() {
 
   document.getElementById("upload-steps").style.display = "block";
 
-  const datosH = JSON.parse(localStorage.getItem("quenas_" + idReserva + "_huespedes") || "{}");
-  const datosV = JSON.parse(localStorage.getItem("quenas_" + idReserva + "_vuelo") || "{}");
+  const datosH = JSON.parse(sessionStorage.getItem("qn_" + idReserva + "_h") || "{}");
+  const datosV = JSON.parse(sessionStorage.getItem("qn_" + idReserva + "_v") || "{}");
 
   // Si no hay SCRIPT_URL configurado, simular envío exitoso
   const modoDemo = !SCRIPT_URL || SCRIPT_URL.includes("PLACEHOLDER_NEVER");
@@ -369,9 +371,9 @@ async function enviarRegistro() {
       `https://wa.me/51987341632?text=${encodeURIComponent(msgWa)}`;
 
     // Limpiar localStorage
-    localStorage.removeItem("quenas_" + idReserva + "_huespedes");
-    localStorage.removeItem("quenas_" + idReserva + "_vuelo");
-    localStorage.removeItem("quenas_" + idReserva + "_meta");
+    sessionStorage.removeItem("qn_" + idReserva + "_h");
+    sessionStorage.removeItem("qn_" + idReserva + "_v");
+    
 
   } catch (err) {
     setStep("step-datos", "error");
